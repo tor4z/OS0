@@ -14,7 +14,9 @@ LDFLAGS := -m elf_i386
 BOOT_DIR := boot
 DOC_DIR := Documentation
 
+# export variable into sub-makefile
 export
+
 
 .PHONY: all
 all: doc_html
@@ -25,19 +27,49 @@ boot.bin:
 	$(MAKE) -C $(BOOT_DIR) boot.bin
 
 
+.PHONY: loader.bin
+loader.bin:
+	$(MAKE) -C $(BOOT_DIR) loader.bin
+
+
 a.img: boot.bin
 	dd if=boot/boot.bin of=a.img bs=512 count=1
 	dd if=/dev/zero of=a.img bs=512 count=2879 skip=1 seek=1
 
 
+.PHONY: copy_loader
+copy_loader: a.img loader.bin
+	mkdir -p /tmp/floppy
+	-sudo umount /tmp/floppy
+	sudo mount -o loop a.img /tmp/floppy
+	sudo cp boot/loader.bin /tmp/floppy
+	sudo umount /tmp/floppy
+
+
+.PHONY: build
+build: copy_loader
+
+
+.PHONY: rebuild
+rebuild: clean build
+
+
 .PHONY: qemu
-qemu: a.img
+qemu: build
 	$(QEMU) -drive file=a.img,if=floppy
 
 
 .PHONY: bochs
-bochs: a.img bochsrc
+bochs: build bochsrc
 	$(BOCHS) -f bochsrc
+
+
+.PHONY: rebuild_qemu
+rebuild_qemu: clean qemu
+
+
+.PHONY: rebuild_bochs
+rebuild_bochs: clean bochs
 
 
 .PHONY: doc_html

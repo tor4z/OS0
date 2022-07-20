@@ -9,7 +9,6 @@ boot_init:
     nop
     .include "include/fat12hdr.S"
 
-
 boot_entry:
     ################################################
     # We setting up the ds, es, ss and sp register #
@@ -20,58 +19,176 @@ boot_entry:
     movw %ax, %ss
     movw $BaseOfStack, %sp
 
-    ################
-    # clean screen #
-    ################
-    # ah: function code
-    # al: number of line to scroll, 00h for entire window
-    # ch, cl: row, col of window's upper left corner
-    # dh, dl: row, col of window's lower right corner
-    movw $0x0600, %ax       # Set ah to 06h, set al to 00h
-    movw $0x0700, %bx       # Set font color, and background color
-    movw $0, %cx            # Set upper left corner to (0, 0)
-    movw $0x1850, %dx       # Set lower right corner to (80, 24)
-    int $0x10               # interrupt
+    call clean_screen
 
-    leaw init_msg, %si
-    call print_string
-fin:
-    hlt
-    jmp fin
+    // leaw init_msg, %si
+    // call print_string
 
-
+    call reset_sector
+    call read_FAT1
+read_loader:
+    call find_loader
+    # the start logical cluster is stored in ax register
+    call read_file
+    jmp 0x9200
 
 
 ################################################################
-# @fnnction: print a string                                    #
+# @function: read FAT1                                         #
 # @parameter:                                                  #
-#   si: The address of the string, the string MUST end with 0. #
+#   Nothing                                                    #
 # @return                                                      #
-#   nothing                                                    #
+#   Nothing                                                    #
 ################################################################
-    .type print_string, @function
-print_string:
-    movb (%si), %al         # load the char into al register
-    incw %si                # increse si, try to read next char
-    cmpb $0, %al            # Check is reach the end of the string
-    je print_string_ret     # Jump to return if we reach the end of the string
-    movb $0x0e, %ah         # Set 0x0e to ah means print a char
-    movw $10, %bx           # Set page number and color
-    int $0x10               # interrupt
-    jmp print_string        # print next char
-print_string_ret:
-    ret                     # return
+    .set FAT1_ADDR, 0x7e00
+    .type read_FAT1, @function
+read_FAT1:
+    pushw %ax
+    pushw %cx
+
+    movw $1, %ax
+    movw $9, %cx
+    movw $FAT1_ADDR, %bx
+    call read_sector
+read_FAT1_ret:
+    popw %cx
+    popw %ax
+    leaw FAT1_loaded_msg, %si
+    call print_string
+    ret
+
+################################################################
+# @function: query FAT1                                        #
+# @parameter:                                                  #
+#   ax: logical cluster                                       #
+# @return                                                      #
+#   ax: next cluster or EOC                                    #
+################################################################
+    .type query_FAT1, @function
+query_FAT1:
+    pushw %bx
+    pushw %cx
+    pushw %si
+
+    movw %ax, %cx
+    movw $3, %bx
+    mulw %bx
+    movw $2, %bx
+    divw %bx
+    addw $FAT1_ADDR, %ax
+    movw %ax, %si
+    movb (%si), %bl
+    inc %si
+    movb (%si), %bh
+    testw $0x1, %cx
+    jz cluster_number_even
+    jmp cluster_number_odd
+cluster_number_even:
+    xorw %ax, %ax
+    movb %bh, %ah
+    movb %bl, %al
+    andw $0xfff, %ax
+    jmp query_FAT1_ret
+cluster_number_odd:
+    xorw %ax, %ax
+    movb %bl, %al
+    shrw $4, %ax
+    movb %bh, %ah
+    andw $0xfff, %ax
+query_FAT1_ret:
+    popw %si
+    popw %cx
+    popw %bx
+    ret
+
+################################################################
+# @function: read file                                         #
+# @parameter:                                                  #
+#   ax: begin sector                                           #
+#   es:di: target address                                      #
+# @return                                                      #
+#   Nothing                                                    #
+################################################################
+    .type read_file, @function
+read_file:
+    pushw %bx
+    pushw %cx
+    pushw %dx
+
+    movw $LOADER_ADDR, %bx
+read_file_loop:
+    movw %ax, %dx
+    call logical_to_physical
+    movw $1, %cx
+    call read_sector
+    movw %dx, %ax
+    call query_FAT1
+    cmpw $0xfff, %ax
+    je read_file_ret
+    addw $512, %bx
+    jmp read_file_loop
+read_file_ret:
+    popw %dx
+    popw %cx
+    popw %bx
+    ret
 
 
-init_msg:
-    .asciz "Init boot...\n"
+################################################################
+# @function: find file                                         #
+# @parameter:                                                  #
+#   Nothing                                                    #
+# @return                                                      #
+#   Nothing                                                    #
+################################################################
+# Temporary memory to store direction (512B)
+    .set TEMP_MEM, 0x9000
+
+    .type find_file, @function
+find_loader:
+    movw $ROOT_DIR_BEGIN_SECTOR_INDEX, %ax
+find_loader_loop:
+    movw $1, %cx                    # We read 1 sector in a times
+    movw $TEMP_MEM, %bx
+    call read_sector
+
+    movw $TEMP_MEM, %di
+    movw $NUM_DIR_ENTRY_A_SECTOR, %dx
+find_loader_cmp:
+    leaw loader_filename, %si
+    movw $11, %cx
+    cld
+    repe cmpsb
+    je find_loader_ret
+    addw $32, %di
+    subw $loader_filename, %si
+    subw %si, %di
+    dec %dx
+    cmpw $0, %dx
+    jnz find_loader_cmp
+    inc %ax
+    cmpw $MAX_ROOT_DIR_SECTOR_INDEX, %ax
+    jnc find_loader_loop
+find_loader_error:
+    leaw loader_notfound_msg, %si
+    call print_string
+find_loader_ret:
+    addw $15, %di
+    movw (%di), %ax
+    ret
+
+
+// init_msg:
+//     .asciz "Init ...\r\n"
 read_success_msg:
-    .asciz "Read disk success\n"
-read_fail_msg:
-    .asciz "Read disk fail\n"
-jump_to_loader_msg:
-    .asciz "Ready to jump to loader\n"
+    .asciz "Read success\r\n"
+loader_notfound_msg:
+    .asciz "Loader notfound\r\n"
+FAT1_loaded_msg:
+    .asciz "FAT1 loaded\r\n"
 
+    .include "include/boothdr.S"
+    .include "include/loaderhdr.S"
 
     .fill 510 - (. - boot_init), 1, 0
     .byte 0x55, 0xaa

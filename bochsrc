@@ -15,9 +15,9 @@ megs: 32  # MB
 # BIOS distributed with Bochs. The start address is optional, since
 # it can be calculated from image size. The Bochs BIOS currently
 # supports only the option "fastboot" to skip the boot menu delay.
-romimage: file=/usr/share/bochs/BIOS-bochs-latest
+romimage: file=/usr/local/share/bochs/BIOS-bochs-latest
 # This tells Bochs what VGA ROM BIOS to load (at 0xC0000).
-vgaromimage: file=/usr/share/vgabios/vgabios.bin
+vgaromimage: file=/usr/local/share/bochs/VGABIOS-elpin-2.40
 
 
 # Floppya is the first drive, and floppyb is the second drive.
@@ -54,7 +54,7 @@ boot: floppy
 # set the filename to '-' the output is written to the console.
 # If you really don't want it, make it "/dev/null" (Unix) or "nul"
 # (win32). :^(
-log: bochs_log.txt
+log: bochs_log.log
 
 
 # This defines parameters for the emulated mouse type, the initial
@@ -133,4 +133,4 @@ mouse: enabled=0
 # keyboard: keymap=gui/keymaps/x11-pc-de.map
 # keyboard: user_shortcut=ctrl-alt-del
 
-keyboard: keymap=/usr/share/bochs/keymaps/x11-pc-us.map
+keyboard: keymap=/usr/local/share/bochs/keymaps/x11-pc-us.map

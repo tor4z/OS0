@@ -18,3 +18,9 @@
     .int   0                #   39   4     Volume ID
     .ascii "OS0.S0     "    #   43  11     Volume label
     .ascii "FAT12   "       #   54   8     File system type
+
+
+    .set ROOT_DIR_SECTORS, 14
+    .set ROOT_DIR_BEGIN_SECTOR_INDEX, 19
+    .set MAX_ROOT_DIR_SECTOR_INDEX, 33
+    .set NUM_DIR_ENTRY_A_SECTOR, 16
