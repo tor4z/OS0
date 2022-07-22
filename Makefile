@@ -7,7 +7,10 @@ QEMU := qemu-system-i386
 BOCHS := bochs
 
 BOOT_ENTRY := 0x7c00
-CFLAGS := -Wall
+LOADER_ENTRY := 0x9200
+CFLAGS := -Wall -nostdinc -fno-builtin -m32 -MD
+CFLAGS += -Wno-format -Wno-unused -Werror
+CFLAGS += -fno-omit-frame-pointer
 ASFLAGS := --32
 LDFLAGS := -m elf_i386
 

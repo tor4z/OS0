@@ -1,3 +1,6 @@
+CFLAGS += -I./include
+
+
 .PHONY: all
 all: loader.bin boot.bin
 
@@ -7,7 +10,7 @@ boot.o: boot.S
 
 
 loader.o: loader.S
-	$(AS) $(ASFLAGS) $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 
 boot.bin: boot.o
@@ -16,7 +19,7 @@ boot.bin: boot.o
 
 
 loader.bin: loader.o
-	$(LD) $(LDFLAGS) $< -o loader.out
+	$(LD) $(LDFLAGS) -N -e start -Ttext $(LOADER_ENTRY) $< -o loader.out
 	$(OBJCOPY) -S -O binary loader.out $@
 
 

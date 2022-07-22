@@ -20,10 +20,6 @@ boot_entry:
     movw $BaseOfStack, %sp
 
     call clean_screen
-
-    // leaw init_msg, %si
-    // call print_string
-
     call reset_sector
     call read_FAT1
 read_loader:
@@ -92,8 +88,8 @@ cluster_number_even:
 cluster_number_odd:
     xorw %ax, %ax
     movb %bl, %al
-    shrw $4, %ax
     movb %bh, %ah
+    shrw $4, %ax
     andw $0xfff, %ax
 query_FAT1_ret:
     popw %si
@@ -188,7 +184,6 @@ FAT1_loaded_msg:
     .asciz "FAT1 loaded\r\n"
 
     .include "include/boothdr.S"
-    .include "include/loaderhdr.S"
 
     .fill 510 - (. - boot_init), 1, 0
     .byte 0x55, 0xaa

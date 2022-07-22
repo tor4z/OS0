@@ -1,3 +1,6 @@
+    .set LOADER_ADDR, 0x9200
+
+
 ################################################################
 # @function: clean screen                                      #
 # @parameter:                                                  #
@@ -20,6 +23,10 @@ clean_screen:
     movw $0x0, %cx          # Set upper left corner to (0, 0)
     movw $0x1850, %dx       # Set lower right corner to (80, 24)
     int $0x10               # interrupt
+    movb $0x02, %ah
+    movb $0x0, %bh
+    movw $0x0, %dx
+    int $0x10
 clean_screen_ret:
     popw %dx
     popw %cx
@@ -76,7 +83,6 @@ reset_sector:
 reset_sector_error:
     leaw reset_fail_msg, %si
     call print_string
-    jmp on_error
 reset_sector_ret:
     popw %dx
     popw %ax
@@ -129,7 +135,6 @@ read_sector_loop:
 read_sector_error:
     leaw read_fail_msg, %si
     call print_string
-    jmp on_error
 read_sector_ret:
     popw %di
     popw %si
@@ -159,6 +164,5 @@ reset_fail_msg:
 //     .asciz "Read sector\r\n"
 read_fail_msg:
     .asciz "Read fail\r\n"
-
-
-
+loader_filename:
+    .ascii "LOADER  BIN"

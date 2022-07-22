@@ -10,7 +10,10 @@ Welcome to OS0's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   boot/boot
+   boot/loader
+   boot/memory_map
+   boot/real_mode_programing
 
 Indices and tables
 ==================
