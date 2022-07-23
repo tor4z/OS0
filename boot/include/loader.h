@@ -62,6 +62,36 @@
 #define GDT_FLAGS_RESERVED  0x10
 
 
+#define SELECTOR_ATTR_GDT     0x0
+#define SELECTOR_ATTR_LDT     0x4
+#define SELECTOR_ATTR_PL0     0x0
+#define SELECTOR_ATTR_PL1     0x1
+#define SELECTOR_ATTR_PL2     0x2
+#define SELECTOR_ATTR_PL3     0x3
+
+
+#define CALL_GATE_16    0x4
+#define CALL_GATE_32    0xc
+#define CALL_GATE_PL0   0x0
+#define CALL_GATE_PL1   0x1
+#define CALL_GATE_PL2   0x2
+#define CALL_GATE_PL3   0x3
+#define CALL_GATE_P     0x1
+#define CALL_GATE_NP    0x0
+
+
+#define GDT_SELECTOR_NULL 0x0
+#define GDT_SELECTOR_CODE 0x8
+#define GDT_SELECTOR_DATA 0x10
+#define GDT_SELECTOR_LDT  0x18      // ldt
+#define GDT_SELECTOR_CG   0x20      // call gate
+#define GDT_SELECTOR_TASK 0x28
+#define CG_SELECTOR_CODE  0x30
+
+#define LDT_SELECTOR_CODE (0x0 | SELECTOR_ATTR_LDT)
+
+
+
 #ifdef __ASSEMBLER__
 
 #define DEF_GDT_NULL    \
@@ -74,6 +104,19 @@
           ((access) & 0xff),                            \
           (((limit >> 16) & 0x0f) | ((flags) & 0xf0)),  \
           ((base >> 24) & 0xff)
+
+
+#define DEF_LDT(base, limit, access, flags)         \
+    DEF_GDT(base, limit, access, flags)
+
+
+#define DEF_CALL_GATE(offset, selector, param_cnt, type, dpl, p)    \
+    .word (offset & 0xffff);                                        \
+    .word selector;                                                 \
+    .byte (param_cnt & 0x0f);                                       \
+    .byte ((type & 0x0f) | ((dpl << 5) & 0x60) | ((p << 7) & 0x80));\
+    .word ((offset >> 16) & 0xffff)
+
 
 #else // __ASSEMBLER__
 

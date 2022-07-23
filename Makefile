@@ -63,8 +63,8 @@ qemu: build
 
 
 .PHONY: bochs
-bochs: build bochsrc
-	$(BOCHS) -f bochsrc
+bochs: build bochsrc.yaml
+	$(BOCHS) -f bochsrc.yaml
 
 
 .PHONY: rebuild_qemu
