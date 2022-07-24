@@ -82,18 +82,18 @@
 #define CALL_GATE_P     0x1
 #define CALL_GATE_NP    0x0
 
-
 #define GDT_SELECTOR_NULL       0x0
 #define GDT_SELECTOR_CODE       0x8
 #define GDT_SELECTOR_DATA       0x10
 #define GDT_SELECTOR_LDT        0x18      // ldt
 #define GDT_SELECTOR_CG         0x20      // call gate
 #define GDT_SELECTOR_TASK       0x28
-#define CG_SELECTOR_CODE        0x30
+#define CG_SELECTOR_CODE        (0x30 | SELECTOR_ATTR_PL3)
 #define GDT_SELECTOR_R3_CODE    (0x38 | SELECTOR_ATTR_PL3)
 #define GDT_SELECTOR_STACK      0x40
 #define GDT_SELECTOR_R3_STACK   (0x48 | SELECTOR_ATTR_PL3)
 #define GDT_SELECTOR_VGA_MEM    (0x50 | SELECTOR_ATTR_PL3)
+#define GDT_SELECTOR_TSS        0x58
 
 #define LDT_SELECTOR_CODE (0x0 | SELECTOR_ATTR_LDT)
 
@@ -123,6 +123,37 @@
     .byte (param_cnt & 0x0f);                                       \
     .byte ((type & 0x0f) | ((dpl << 5) & 0x60) | ((p << 7) & 0x80));\
     .word ((offset >> 16) & 0xffff)
+
+// 80386 32-Bit Task State Segment
+#define DEF_TSS(stack_top, stack_selector)          \
+    .int 0;                 /*BACK         | 0x00*/ \
+    .int stack_top;         /*ESP0         | 0x04*/ \
+    .int stack_selector;    /*SS0          | 0x08*/ \
+    .int 0;                 /*ESP1         | 0x0c*/ \
+    .int 0;                 /*SS1          | 0x10*/ \
+    .int 0;                 /*ESP2         | 0x14*/ \
+    .int 0;                 /*SS1          | 0x18*/ \
+    .int 0;                 /*CR3          | 0x1c*/ \
+    .int 0;                 /*EIP          | 0x20*/ \
+    .int 0;                 /*EFLAGS       | 0x24*/ \
+    .int 0;                 /*EAX          | 0x28*/ \
+    .int 0;                 /*ECX          | 0x2c*/ \
+    .int 0;                 /*EDX          | 0x30*/ \
+    .int 0;                 /*EBX          | 0x34*/ \
+    .int 0;                 /*ESP          | 0x38*/ \
+    .int 0;                 /*EBP          | 0x3c*/ \
+    .int 0;                 /*ESI          | 0x40*/ \
+    .int 0;                 /*EDI          | 0x44*/ \
+    .int 0;                 /*ES           | 0x48*/ \
+    .int 0;                 /*CS           | 0x4c*/ \
+    .int 0;                 /*SS           | 0x50*/ \
+    .int 0;                 /*DS           | 0x54*/ \
+    .int 0;                 /*FS           | 0x58*/ \
+    .int 0;                 /*GS           | 0x5c*/ \
+    .int 0;                 /*LDTR         | 0x60*/ \
+    .word 0;                 /*LDTR         | 0x60*/ \
+    .word (. - TSS_SECTION + 2);             /*I/O MAP base | 0x64*/ \
+    .byte 0xff;             /*end          | 0x68*/
 
 
 #else // __ASSEMBLER__

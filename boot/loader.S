@@ -49,7 +49,7 @@ start:
     call wait_kb_out
 
 
-    # set call gate descroptor base
+    # set GDT code descroptor base
     movl $protect_mod, %eax
     movl $GDT_CODE, %ebx
     call set_dt
@@ -69,14 +69,19 @@ start:
     movl $GDT_R3_CODE, %ebx
     call set_dt
 
-    # set rin3 descriptor base
+    # set global stack base
     movl $global_stack_section, %eax
     movl $GDT_GLOBAL_STACK, %ebx
     call set_dt
 
-    # set rin3 descriptor base
+    # set rin3 stack base
     movl $r3_stack_section, %eax
     movl $GDT_R3_STACK, %ebx
+    call set_dt
+
+    # set TSS descriptor base
+    movl $TSS_SECTION, %eax
+    movl $GDT_TSS, %ebx
     call set_dt
 
 
@@ -98,13 +103,16 @@ protect_mod:
     movw %ax, %gs
     movw $GDT_SELECTOR_STACK, %ax
     movw %ax, %ss
-    movw $global_stack_section_len, %esp    # stack top
+    movl $global_stack_section_len, %esp    # stack top
 
 
     // movl $init_loader_msg, %esi
     // call print_string_32
 
-    // call $CG_SELECTOR_CODE, $0x0
+    call $CG_SELECTOR_CODE, $0x0
+
+    movw $GDT_SELECTOR_TSS, %ax
+    ltr %ax
 
     # push type should be consistent with stack alignment
     pushl $GDT_SELECTOR_R3_STACK
@@ -136,9 +144,12 @@ ldt_protect_mode_fin:
 
 
     .code32
+    .type call_gate_code, @function
 call_gate_code:
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %ds
+    movl $0, %ebx
     movw $0x0f43, %ax           # print C
-    movl $VIDEO_MEM, %ebx
     movw %ax, (%ebx)
 call_gate_code_ret:
     retf
@@ -152,10 +163,17 @@ code_ring_3:
     movw $GDT_SELECTOR_VGA_MEM, %ax
     movw %ax, %ds
     movl $0, %ebx
-    movw $0x0f33, %ax
+    movw $0x0f33, %ax       # print 3
     movw %ax, (%ebx)
+    // ring3 to ring0
+    call $CG_SELECTOR_CODE, $0x0
+
+
 code_ring_3_fin:
-    hlt 
+    # Since issuing the HLT instruction requires ring 0 access,
+    # it can only be run by privileged system software such as
+    # the kernel.
+    // hlt
     jmp code_ring_3_fin
 
     .set code_ring_3_len, (. - code_ring_3)
@@ -311,13 +329,13 @@ wait_kb_out:
     ret
 
 
-    .align 16
+    .align 32
 GDT_0:
     DEF_GDT_NULL        # NULL, 0x0
 GDT_CODE:
     DEF_GDT(
         0x0,
-        protect_mod_len - 1,
+        protect_mod_len,
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_RW,
         GDT_FLAGS_G | GDT_FLAGS_DB
@@ -342,7 +360,7 @@ GDT_CG_CODE:
     # need to reset with real base
     DEF_GDT(
         0x0,
-        call_gate_code_len - 1,
+        call_gate_code_len,
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_RW,
         GDT_FLAGS_G | GDT_FLAGS_DB
@@ -355,14 +373,14 @@ CG_0:
         GDT_SELECTOR_CG,
         0,
         CALL_GATE_32,
-        CALL_GATE_PL0,
+        CALL_GATE_PL3,
         CALL_GATE_P
     )                   # call gate, 0x30
 GDT_R3_CODE:
     # need to reset with real base
     DEF_GDT(
         0x0,
-        code_ring_3_len - 1,
+        code_ring_3_len,
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_RW |
             GDT_ACCESS_BYTE_DPL3,
@@ -391,7 +409,16 @@ GDT_VGA_MEM:
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_RW | GDT_ACCESS_BYTE_DPL3,
         GDT_FLAGS_G | GDT_FLAGS_DB
-    )                   # VGA memory, 0x48
+    )                   # VGA memory, 0x50
+GDT_TSS:
+    # need to reset with real base
+    DEF_GDT(
+        0x0,
+        tss_len,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_E |
+            GDT_ACCESS_BYTE_A,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    )                   # TSS, 0x58
 
 
 GDTR0:
@@ -399,7 +426,6 @@ GDTR0:
     .int GDT_0
 
 
-    .align 32
 LDT0:
     DEF_LDT(
         0x0,
@@ -411,7 +437,7 @@ LDT0:
 
 
 #############################################################
-# Global stack in protect mode, the size i0s 512 bytes.     #
+# Global stack in protect mode, the size is 512 bytes.      #
 #############################################################
     .align 32
     .code32
@@ -421,7 +447,7 @@ global_stack_section:
 
 
 #############################################################
-# Global stack in protect r3 mode, the size i0s 512 bytes.  #
+# Global stack in protect mode / r3, the size is 512 bytes. #
 #############################################################
     .align 32
     .code32
@@ -430,6 +456,11 @@ r3_stack_section:
     .set r3_stack_section_len, (. - r3_stack_section)
 
 
+    .code32
+    .align 32
+TSS_SECTION:
+    DEF_TSS(global_stack_section_len, GDT_SELECTOR_STACK)
+    .set tss_len, (. - TSS_SECTION)
 
     // .align 16
     // .code16
