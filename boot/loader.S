@@ -64,6 +64,22 @@ start:
     movl $GDT_LDT, %ebx
     call set_dt
 
+    # set rin3 descriptor base
+    movl $code_ring_3, %eax
+    movl $GDT_R3_CODE, %ebx
+    call set_dt
+
+    # set rin3 descriptor base
+    movl $global_stack_section, %eax
+    movl $GDT_GLOBAL_STACK, %ebx
+    call set_dt
+
+    # set rin3 descriptor base
+    movl $r3_stack_section, %eax
+    movl $GDT_R3_STACK, %ebx
+    call set_dt
+
+
     lgdt GDTR0
     movl %cr0, %eax
     or $0x1, %eax
@@ -80,12 +96,22 @@ protect_mod:
     movw %ax, %es
     movw %ax, %fs
     movw %ax, %gs
+    movw $GDT_SELECTOR_STACK, %ax
     movw %ax, %ss
+    movw $global_stack_section_len, %esp    # stack top
 
-    movl $init_loader_msg, %esi
-    call print_string_32
 
-    call $CG_SELECTOR_CODE, $0x0
+    // movl $init_loader_msg, %esi
+    // call print_string_32
+
+    // call $CG_SELECTOR_CODE, $0x0
+
+    # push type should be consistent with stack alignment
+    pushl $GDT_SELECTOR_R3_STACK
+    pushl $r3_stack_section_len             # stack top of r3
+    pushl $GDT_SELECTOR_R3_CODE
+    pushl $0
+    retf
 
     // jump to ldt
     movw $GDT_SELECTOR_LDT, %ax
@@ -118,6 +144,21 @@ call_gate_code_ret:
     retf
 
     .set call_gate_code_len, (. - call_gate_code)
+
+
+    .code32
+    .type code_ring_3, @function
+code_ring_3:
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %ds
+    movl $0, %ebx
+    movw $0x0f33, %ax
+    movw %ax, (%ebx)
+code_ring_3_fin:
+    hlt 
+    jmp code_ring_3_fin
+
+    .set code_ring_3_len, (. - code_ring_3)
 
 ###############################################################
 # @function: set the base of gdt/ldt                          #
@@ -272,7 +313,7 @@ wait_kb_out:
 
     .align 16
 GDT_0:
-    DEF_GDT_NULL        # NULL
+    DEF_GDT_NULL        # NULL, 0x0
 GDT_CODE:
     DEF_GDT(
         0x0,
@@ -280,7 +321,7 @@ GDT_CODE:
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_RW,
         GDT_FLAGS_G | GDT_FLAGS_DB
-    )                   # code
+    )                   # code, 0x8
 GDT_DATA:
     DEF_GDT(
         0x0,
@@ -288,7 +329,7 @@ GDT_DATA:
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_RW,
         GDT_FLAGS_G | GDT_FLAGS_DB
-    )                   # data
+    )                   # data, 0x10
 GDT_LDT:
     # need to reset with real base
     DEF_GDT(
@@ -296,7 +337,7 @@ GDT_LDT:
         0x7,
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_RW,
         0x0
-    )                   # LDT
+    )                   # LDT, 0x18
 GDT_CG_CODE:
     # need to reset with real base
     DEF_GDT(
@@ -305,9 +346,9 @@ GDT_CG_CODE:
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_RW,
         GDT_FLAGS_G | GDT_FLAGS_DB
-    )                   # call gate
+    )                   # call gate, 0x20
 GDT_TASK:
-    DEF_GDT_NULL        # task (not used yet.)
+    DEF_GDT_NULL        # task (not used yet.), 0x28
 CG_0:
     DEF_CALL_GATE(
         0x0,
@@ -316,7 +357,41 @@ CG_0:
         CALL_GATE_32,
         CALL_GATE_PL0,
         CALL_GATE_P
-    )
+    )                   # call gate, 0x30
+GDT_R3_CODE:
+    # need to reset with real base
+    DEF_GDT(
+        0x0,
+        code_ring_3_len - 1,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
+            GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_RW |
+            GDT_ACCESS_BYTE_DPL3,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    )                   # call gate, 0x38
+GDT_GLOBAL_STACK:
+    DEF_GDT(
+        0x0,
+        global_stack_section_len,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
+            GDT_ACCESS_BYTE_RW,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    )                   # global stack, 0x40
+GDT_R3_STACK:
+    DEF_GDT(
+        0x0,
+        r3_stack_section_len,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
+            GDT_ACCESS_BYTE_RW | GDT_ACCESS_BYTE_DPL3,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    )                   # r3 stack, 0x48
+GDT_VGA_MEM:
+    DEF_GDT(
+        0x0b8000,
+        0xfffff,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
+            GDT_ACCESS_BYTE_RW | GDT_ACCESS_BYTE_DPL3,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    )                   # VGA memory, 0x48
 
 
 GDTR0:
@@ -332,9 +407,32 @@ LDT0:
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_E,
         GDT_FLAGS_DB
-    )
+    )               # ldt for test, 0x0
 
 
+#############################################################
+# Global stack in protect mode, the size i0s 512 bytes.     #
+#############################################################
+    .align 32
+    .code32
+global_stack_section:
+    .fill 512, 1, 0
+    .set global_stack_section_len, (. - global_stack_section)
+
+
+#############################################################
+# Global stack in protect r3 mode, the size i0s 512 bytes.  #
+#############################################################
+    .align 32
+    .code32
+r3_stack_section:
+    .fill 512, 1, 0
+    .set r3_stack_section_len, (. - r3_stack_section)
+
+
+
+    // .align 16
+    // .code16
 init_loader_msg:
     .asciz "Init loader ...\r\n"
 init_GDT_msg:

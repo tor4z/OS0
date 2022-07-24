@@ -7,7 +7,10 @@
 // Descriptor privilege level field. Contains the CPU Privilege
 // level of the segment. 0 = highest privilege (kernel),
 // 3 = lowest privilege (user applications).
-#define GDT_ACCESS_BYTE_DPL 0x60
+#define GDT_ACCESS_BYTE_DPL0 0x00
+#define GDT_ACCESS_BYTE_DPL1 0x20
+#define GDT_ACCESS_BYTE_DPL2 0x40
+#define GDT_ACCESS_BYTE_DPL3 0x60
 // Descriptor type bit. If clear (0) the descriptor defines
 // a system segment (eg. a Task State Segment). If set (1)
 // it defines a code or data segment.
@@ -80,13 +83,17 @@
 #define CALL_GATE_NP    0x0
 
 
-#define GDT_SELECTOR_NULL 0x0
-#define GDT_SELECTOR_CODE 0x8
-#define GDT_SELECTOR_DATA 0x10
-#define GDT_SELECTOR_LDT  0x18      // ldt
-#define GDT_SELECTOR_CG   0x20      // call gate
-#define GDT_SELECTOR_TASK 0x28
-#define CG_SELECTOR_CODE  0x30
+#define GDT_SELECTOR_NULL       0x0
+#define GDT_SELECTOR_CODE       0x8
+#define GDT_SELECTOR_DATA       0x10
+#define GDT_SELECTOR_LDT        0x18      // ldt
+#define GDT_SELECTOR_CG         0x20      // call gate
+#define GDT_SELECTOR_TASK       0x28
+#define CG_SELECTOR_CODE        0x30
+#define GDT_SELECTOR_R3_CODE    (0x38 | SELECTOR_ATTR_PL3)
+#define GDT_SELECTOR_STACK      0x40
+#define GDT_SELECTOR_R3_STACK   (0x48 | SELECTOR_ATTR_PL3)
+#define GDT_SELECTOR_VGA_MEM    (0x50 | SELECTOR_ATTR_PL3)
 
 #define LDT_SELECTOR_CODE (0x0 | SELECTOR_ATTR_LDT)
 
