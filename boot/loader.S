@@ -85,7 +85,10 @@ start:
     call set_dt
 
 
-    lgdt GDTR0
+    lgdt GDTR
+
+    lidt IDTR
+
     movl %cr0, %eax
     or $0x1, %eax
     movl %eax, %cr0
@@ -110,6 +113,10 @@ protect_mod:
 
     // movl $init_loader_msg, %esi
     // call print_string_32
+
+    sti
+    int $0x80
+    // jmp .
 
     call $CG_SELECTOR_CODE, $0x0
 
@@ -173,6 +180,18 @@ setup_page_ret:
     ret
 
 
+    .code32
+    .type int_code, @function
+user_int_code:
+    .set user_int_code_offset, (. - protect_mod)
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %ds
+    movw $0x0f49, %ax
+    xorl %ebx, %ebx
+    movw %ax, (%ebx)
+user_int_code_iret:
+    iret
+
     .set protect_mod_len, (. - protect_mod)
 
 
@@ -192,7 +211,7 @@ ldt_protect_mode_fin:
 call_gate_code:
     movw $GDT_SELECTOR_VGA_MEM, %ax
     movw %ax, %ds
-    movl $0, %ebx
+    xorl %ebx, %ebx
     movw $0x0f43, %ax           # print C
     movw %ax, (%ebx)
 call_gate_code_ret:
@@ -415,9 +434,7 @@ CG_0:
         0x0,
         GDT_SELECTOR_CG,
         0,
-        CALL_GATE_32,
-        CALL_GATE_PL3,
-        CALL_GATE_P
+        CALL_GATE_32 | CALL_GATE_PL3 | CALL_GATE_P
     )                   # call gate, 0x30
 GDT_R3_CODE:
     # need to reset with real base
@@ -481,8 +498,9 @@ GDT_PG_TBL:
         GDT_FLAGS_G
     )                   # page table, 0x68
 
-GDTR0:
-    .short (GDTR0 - GDT_0) - 1
+
+GDTR:
+    .word (GDTR - GDT_0) - 1
     .int GDT_0
 
 
@@ -494,6 +512,21 @@ LDT0:
             GDT_ACCESS_BYTE_E,
         GDT_FLAGS_DB
     )               # ldt for test, 0x0
+
+
+
+IDT0:
+    .rept 255
+    DEF_INT_GATE(
+        user_int_code_offset,
+        GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    )
+    .endr
+
+IDTR:
+    .word (IDTR - IDT0 - 1)
+    .int IDT0
 
 
 #############################################################

@@ -73,14 +73,25 @@
 #define SELECTOR_ATTR_PL3     0x3
 
 
-#define CALL_GATE_16    0x4
-#define CALL_GATE_32    0xc
-#define CALL_GATE_PL0   0x0
-#define CALL_GATE_PL1   0x1
-#define CALL_GATE_PL2   0x2
-#define CALL_GATE_PL3   0x3
-#define CALL_GATE_P     0x1
-#define CALL_GATE_NP    0x0
+#define CALL_GATE_16    0x04
+#define CALL_GATE_32    0x0c
+#define CALL_GATE_PL0   0x00
+#define CALL_GATE_PL1   0x20
+#define CALL_GATE_PL2   0x40
+#define CALL_GATE_PL3   0x60
+#define CALL_GATE_P     0x80
+
+#define INT_GATE_TASK   0x05
+#define INT_GATE_INT16  0x06
+#define INT_GATE_TRAP16 0x07
+#define INT_GATE_INT32  0x0e
+#define INT_GATE_TRAP32 0x0f
+#define INT_GATE_PL0    0x00
+#define INT_GATE_PL1    0x20
+#define INT_GATE_PL2    0x40
+#define INT_GATE_PL3    0x60
+#define INT_GATE_P      0x80
+
 
 #define GDT_SELECTOR_NULL       0x0
 #define GDT_SELECTOR_CODE       0x8
@@ -156,12 +167,21 @@
     DEF_GDT(base, limit, access, flags)
 
 
-#define DEF_CALL_GATE(offset, selector, param_cnt, type, dpl, p)    \
-    .word (offset & 0xffff);                                        \
-    .word selector;                                                 \
-    .byte (param_cnt & 0x0f);                                       \
-    .byte ((type & 0x0f) | ((dpl << 5) & 0x60) | ((p << 7) & 0x80));\
+#define DEF_CALL_GATE(offset, selector, param_cnt, attr)    \
+    .word (offset & 0xffff);                                \
+    .word selector;                                         \
+    .byte (param_cnt & 0x0f);                               \
+    .byte attr;                                             \
     .word ((offset >> 16) & 0xffff)
+
+
+#define DEF_INT_GATE(offset, selector, attr)    \
+    .word (offset & 0xffff);                    \
+    .word selector;                             \
+    .byte 0x00;                                 \
+    .byte attr;                                 \
+    .word ((offset >> 16) & 0xffff)
+
 
 // 80386 32-Bit Task State Segment
 #define DEF_TSS(stack_top, stack_selector)          \
