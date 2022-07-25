@@ -96,6 +96,8 @@ start:
 
     .code32
 protect_mod:
+    call setup_page
+
     movw $GDT_SELECTOR_DATA, %ax
     movw %ax, %ds
     movw %ax, %es
@@ -128,6 +130,48 @@ protect_mod:
 protect_mod_fin:
     hlt
     jmp protect_mod_fin
+
+
+###############################################################
+# @function: setup page                                       #
+# @parameter:                                                 #
+#   Nothing                                                   #
+# @return:                                                    #
+#   Nothing                                                   #
+###############################################################
+    .type setup_page, @function
+setup_page:
+    nop
+    movw $GDT_SELECTOR_PG_DIR, %ax
+    movw %ax, %es
+    xorl %edi, %edi
+    xorl %eax, %eax
+    movl $(PAGE_TBL_BASE | PG_P | PG_RW_RW | PG_US_U), %eax
+    movl $1024, %ecx
+.pe:
+    stosl
+    addl $4096, %eax
+    loop .pe
+
+    movw $GDT_SELECTOR_PG_TBL, %ax
+    movw %ax, %es
+    xorl %edi, %edi
+    xorl %eax, %eax
+    movl $(PG_P | PG_RW_RW | PG_US_U), %eax
+    movl $1048576, %ecx                         # 1024 * 10124
+.pt:
+    stosl
+    addl $4096, %eax
+    loop .pt
+
+    movl $PAGE_DIR_BASE, %eax
+    movl %eax, %cr3
+    movl %cr0, %eax
+    orl $0x80000000, %eax
+    movl %eax, %cr0
+setup_page_ret:
+    ret
+
 
     .set protect_mod_len, (. - protect_mod)
 
@@ -167,8 +211,6 @@ code_ring_3:
     movw %ax, (%ebx)
     // ring3 to ring0
     call $CG_SELECTOR_CODE, $0x0
-
-
 code_ring_3_fin:
     # Since issuing the HLT instruction requires ring 0 access,
     # it can only be run by privileged system software such as
@@ -177,6 +219,7 @@ code_ring_3_fin:
     jmp code_ring_3_fin
 
     .set code_ring_3_len, (. - code_ring_3)
+
 
 ###############################################################
 # @function: set the base of gdt/ldt                          #
@@ -419,7 +462,24 @@ GDT_TSS:
             GDT_ACCESS_BYTE_A,
         GDT_FLAGS_G | GDT_FLAGS_DB
     )                   # TSS, 0x58
-
+GDT_PG_DIR:
+    # need to reset with real base
+    DEF_GDT(
+        PAGE_DIR_BASE,
+        4096,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
+            GDT_ACCESS_BYTE_RW,
+        GDT_FLAGS_G
+    )                   # page dir, 0x60
+GDT_PG_TBL:
+    # need to reset with real base
+    DEF_GDT(
+        PAGE_TBL_BASE,
+        1024,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
+            GDT_ACCESS_BYTE_RW,
+        GDT_FLAGS_G
+    )                   # page table, 0x68
 
 GDTR0:
     .short (GDTR0 - GDT_0) - 1

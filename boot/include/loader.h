@@ -94,9 +94,48 @@
 #define GDT_SELECTOR_R3_STACK   (0x48 | SELECTOR_ATTR_PL3)
 #define GDT_SELECTOR_VGA_MEM    (0x50 | SELECTOR_ATTR_PL3)
 #define GDT_SELECTOR_TSS        0x58
+#define GDT_SELECTOR_PG_DIR     0x60
+#define GDT_SELECTOR_PG_TBL     0x68
+
 
 #define LDT_SELECTOR_CODE (0x0 | SELECTOR_ATTR_LDT)
 
+
+// we will create 1024 page dir, each page dir point to 1024 page table
+// thus, we have 1024 * 1024 page table totally.
+// The page size is 4KB.
+#define PAGE_DIR_BASE 0x200000  // the base of page dir
+#define PAGE_TBL_BASE 0x201000  // the base of page table
+
+
+// present
+#define PG_P        0x01
+// read/write
+#define PG_RW_RW    0x02
+// read only
+#define PG_RW_RO    0x00
+// user
+#define PG_US_U     0x04
+// supervisor
+#define PG_US_S     0x00
+// page write throught, wite back otherwise
+#define PG_PWT      0x00
+// cache disabled if set, enabled otherwise
+#define PG_PCD      0x00
+// accessed, whether a PDE or PTE was read during virtual address translation.
+#define PG_A        0x00
+// dirty, whether a page has been written to.
+#define PG_D        0x00
+// page size, if the bit is set, then the PDE maps to a page that is 4 MiB in
+// size. Otherwise, it maps to a 4 KiB page table.
+#define PG_PS       0x00
+// Page Attribute Table, If PAT is supported, then PAT along with PCD and PWT
+// shall indicate the memory caching type. Otherwise, it is reserved and must
+// be set to 0.
+#define PG_PAT      0x00
+// Global tells the processor not to invalidate the TLB entry corresponding to
+// the page upon a MOV to CR3 instruction.
+#define PG_G        0x00
 
 
 #ifdef __ASSEMBLER__
