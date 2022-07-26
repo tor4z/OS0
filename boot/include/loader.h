@@ -65,32 +65,33 @@
 #define GDT_FLAGS_RESERVED  0x10
 
 
-#define SELECTOR_ATTR_GDT     0x0
-#define SELECTOR_ATTR_LDT     0x4
-#define SELECTOR_ATTR_PL0     0x0
-#define SELECTOR_ATTR_PL1     0x1
-#define SELECTOR_ATTR_PL2     0x2
-#define SELECTOR_ATTR_PL3     0x3
+#define SELECTOR_ATTR_GDT   0x00
+#define SELECTOR_ATTR_LDT   0x04
+#define SELECTOR_ATTR_PL0   0x00
+#define SELECTOR_ATTR_PL1   0x01
+#define SELECTOR_ATTR_PL2   0x02
+#define SELECTOR_ATTR_PL3   0x03
 
 
-#define CALL_GATE_16    0x04
-#define CALL_GATE_32    0x0c
-#define CALL_GATE_PL0   0x00
-#define CALL_GATE_PL1   0x20
-#define CALL_GATE_PL2   0x40
-#define CALL_GATE_PL3   0x60
-#define CALL_GATE_P     0x80
+#define CALL_GATE_16        0x04
+#define CALL_GATE_32        0x0c
+#define CALL_GATE_PL0       0x00
+#define CALL_GATE_PL1       0x20
+#define CALL_GATE_PL2       0x40
+#define CALL_GATE_PL3       0x60
+#define CALL_GATE_P         0x80
 
-#define INT_GATE_TASK   0x05
-#define INT_GATE_INT16  0x06
-#define INT_GATE_TRAP16 0x07
-#define INT_GATE_INT32  0x0e
-#define INT_GATE_TRAP32 0x0f
-#define INT_GATE_PL0    0x00
-#define INT_GATE_PL1    0x20
-#define INT_GATE_PL2    0x40
-#define INT_GATE_PL3    0x60
-#define INT_GATE_P      0x80
+
+#define INT_GATE_TASK       0x05
+#define INT_GATE_INT16      0x06
+#define INT_GATE_TRAP16     0x07
+#define INT_GATE_INT32      0x0e
+#define INT_GATE_TRAP32     0x0f
+#define INT_GATE_PL0        0x00
+#define INT_GATE_PL1        0x20
+#define INT_GATE_PL2        0x40
+#define INT_GATE_PL3        0x60
+#define INT_GATE_P          0x80
 
 
 #define GDT_SELECTOR_NULL       0x0
@@ -112,7 +113,7 @@
 #define LDT_SELECTOR_CODE (0x0 | SELECTOR_ATTR_LDT)
 
 
-// we will create 1024 page dir, each page dir point to 1024 page table
+// We create 1024 page dir, each page dir point to 1024 page table
 // thus, we have 1024 * 1024 page table totally.
 // The page size is 4KB.
 #define PAGE_DIR_BASE 0x200000  // the base of page dir
@@ -125,9 +126,9 @@
 #define PG_RW_RW    0x02
 // read only
 #define PG_RW_RO    0x00
-// user
+// user level
 #define PG_US_U     0x04
-// supervisor
+// supervisor level
 #define PG_US_S     0x00
 // page write throught, wite back otherwise
 #define PG_PWT      0x00
@@ -155,9 +156,9 @@
     .word 0, 0;         \
     .byte 0, 0, 0, 0
 
-#define DEF_GDT(base, limit, access, flags)        \
-    .word (limit & 0xffff), (base & 0xffff);       \
-    .byte ((base >> 16) & 0xff),                      \
+#define DEF_GDT(base, limit, access, flags)             \
+    .word (limit & 0xffff), (base & 0xffff);            \
+    .byte ((base >> 16) & 0xff),                        \
           ((access) & 0xff),                            \
           (((limit >> 16) & 0x0f) | ((flags) & 0xf0)),  \
           ((base >> 24) & 0xff)
@@ -184,48 +185,48 @@
 
 
 // 80386 32-Bit Task State Segment
-#define DEF_TSS(stack_top, stack_selector)          \
-    .int 0;                 /*BACK         | 0x00*/ \
-    .int stack_top;         /*ESP0         | 0x04*/ \
-    .int stack_selector;    /*SS0          | 0x08*/ \
-    .int 0;                 /*ESP1         | 0x0c*/ \
-    .int 0;                 /*SS1          | 0x10*/ \
-    .int 0;                 /*ESP2         | 0x14*/ \
-    .int 0;                 /*SS1          | 0x18*/ \
-    .int 0;                 /*CR3          | 0x1c*/ \
-    .int 0;                 /*EIP          | 0x20*/ \
-    .int 0;                 /*EFLAGS       | 0x24*/ \
-    .int 0;                 /*EAX          | 0x28*/ \
-    .int 0;                 /*ECX          | 0x2c*/ \
-    .int 0;                 /*EDX          | 0x30*/ \
-    .int 0;                 /*EBX          | 0x34*/ \
-    .int 0;                 /*ESP          | 0x38*/ \
-    .int 0;                 /*EBP          | 0x3c*/ \
-    .int 0;                 /*ESI          | 0x40*/ \
-    .int 0;                 /*EDI          | 0x44*/ \
-    .int 0;                 /*ES           | 0x48*/ \
-    .int 0;                 /*CS           | 0x4c*/ \
-    .int 0;                 /*SS           | 0x50*/ \
-    .int 0;                 /*DS           | 0x54*/ \
-    .int 0;                 /*FS           | 0x58*/ \
-    .int 0;                 /*GS           | 0x5c*/ \
-    .int 0;                 /*LDTR         | 0x60*/ \
-    .word 0;                 /*LDTR         | 0x60*/ \
-    .word (. - TSS_SECTION + 2);             /*I/O MAP base | 0x64*/ \
-    .byte 0xff;             /*end          | 0x68*/
+#define DEF_TSS(stack_top, stack_selector)                  \
+    .int 0;                         /*BACK         | 0x00*/ \
+    .int stack_top;                 /*ESP0         | 0x04*/ \
+    .int stack_selector;            /*SS0          | 0x08*/ \
+    .int 0;                         /*ESP1         | 0x0c*/ \
+    .int 0;                         /*SS1          | 0x10*/ \
+    .int 0;                         /*ESP2         | 0x14*/ \
+    .int 0;                         /*SS1          | 0x18*/ \
+    .int 0;                         /*CR3          | 0x1c*/ \
+    .int 0;                         /*EIP          | 0x20*/ \
+    .int 0;                         /*EFLAGS       | 0x24*/ \
+    .int 0;                         /*EAX          | 0x28*/ \
+    .int 0;                         /*ECX          | 0x2c*/ \
+    .int 0;                         /*EDX          | 0x30*/ \
+    .int 0;                         /*EBX          | 0x34*/ \
+    .int 0;                         /*ESP          | 0x38*/ \
+    .int 0;                         /*EBP          | 0x3c*/ \
+    .int 0;                         /*ESI          | 0x40*/ \
+    .int 0;                         /*EDI          | 0x44*/ \
+    .int 0;                         /*ES           | 0x48*/ \
+    .int 0;                         /*CS           | 0x4c*/ \
+    .int 0;                         /*SS           | 0x50*/ \
+    .int 0;                         /*DS           | 0x54*/ \
+    .int 0;                         /*FS           | 0x58*/ \
+    .int 0;                         /*GS           | 0x5c*/ \
+    .int 0;                         /*LDTR         | 0x60*/ \
+    .word 0;                        /*LDTR         | 0x60*/ \
+    .word (. - TSS_SECTION + 2);    /*I/O MAP base | 0x64*/ \
+    .byte 0xff;                     /*mark end     | 0x68*/
 
 
 #else // __ASSEMBLER__
 
-struct gdt
-{
-    short limit0_15;
-    short base0_15;
-    unsigned char base16_23;
-    unsigned char access_byte;
-    unsigned char limit16_19_flags;
-    unsigned char base24_31;
-};
+// struct gdt
+// {
+//     short limit0_15;
+//     short base0_15;
+//     unsigned char base16_23;
+//     unsigned char access_byte;
+//     unsigned char limit16_19_flags;
+//     unsigned char base24_31;
+// };
 
 #endif // __ASSEMBLER__
 

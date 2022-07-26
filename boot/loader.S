@@ -114,9 +114,9 @@ protect_mod:
     // movl $init_loader_msg, %esi
     // call print_string_32
 
+    call setup_8259A
     sti
     int $0x80
-    // jmp .
 
     call $CG_SELECTOR_CODE, $0x0
 
@@ -182,15 +182,94 @@ setup_page_ret:
 
     .code32
     .type int_code, @function
-user_int_code:
-    .set user_int_code_offset, (. - protect_mod)
+user_int80_code:
+    .set user_int80_code_offset, (. - protect_mod)
     movw $GDT_SELECTOR_VGA_MEM, %ax
     movw %ax, %ds
     movw $0x0f49, %ax
     xorl %ebx, %ebx
     movw %ax, (%ebx)
-user_int_code_iret:
+user_int80_code_iret:
     iret
+
+
+    .code32
+    .type int_code, @function
+clock_int20_code:
+    .set clock_int20_code_offset, (. - protect_mod)
+    xorl %ebx, %ebx
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %ds
+
+    movw (%ebx), %ax
+    cmpb $0x5a, %al
+    jb clock_int20_code_print
+clock_int20_code_reset_char:
+    movb $0x40, %al
+clock_int20_code_print:
+    incb %al
+    movw %ax, (%ebx)
+clock_int20_code_iret:
+    movb $0x20, %al     // send EOI
+    outb %al, $0x20     // master 8259A
+    iret
+
+
+    .code32
+    .type int_code, @function
+phony_int_code:
+    .set phony_int_code_offset, (. - protect_mod)
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %ds
+    movw $0x0f21, %ax           // print !
+    xorl %ebx, %ebx
+    movw %ax, (%ebx)
+phony_int_code_iret:
+    iret
+
+
+###############################################################
+# @function: setup 8259A chip in 8086 mode                    #
+# @parameter:                                                 #
+#   Nothing                                                   #
+# @return:                                                    #
+#   Nothing                                                   #
+###############################################################
+    .code32
+    .type setup_8259A, @function
+setup_8259A:
+    pushw %ax
+
+    // set ICW1
+    movb $0x11, %al
+    outb %al, $0x20         // master 8259A
+    outb %al, $0xa0         // slave 8259A
+
+    // set ICW2
+    movb $0x20, %al
+    outb %al, $0x21         // master 8259A
+    movb $0x28, %al
+    outb %al, $0xa1         // slave 8259A
+
+    // set ICW3
+    movb $0x04, %al
+    outb %al, $0x21         // master 8259A
+    movb $0x02, %al
+    outb %al, $0xa1         // slave 8259A
+
+    // set ICW4
+    movb $0x01, %al
+    outb %al, $0x21         // master 8259A
+    outb %al, $0xa1         // slave 8259A
+
+    // set OCW1
+    movb $0xfe, %al
+    outb %al, $0x21         // master 8259A
+    movb $0xff, %al
+    outb %al, $0xa1         // slave 8259A
+setup_8259A_ret:
+    popw %ax
+    ret
 
     .set protect_mod_len, (. - protect_mod)
 
@@ -516,13 +595,30 @@ LDT0:
 
 
 IDT0:
-    .rept 255
+    .rept 32
     DEF_INT_GATE(
-        user_int_code_offset,
+        phony_int_code_offset,
         GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     )
     .endr
+    DEF_INT_GATE(
+        clock_int20_code_offset,
+        GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    )   # 0x20
+    .rept 95
+    DEF_INT_GATE(
+        phony_int_code_offset,
+        GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    )
+    .endr
+    DEF_INT_GATE(
+        user_int80_code_offset,
+        GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    )   #0x80
 
 IDTR:
     .word (IDTR - IDT0 - 1)
@@ -533,7 +629,6 @@ IDTR:
 # Global stack in protect mode, the size is 512 bytes.      #
 #############################################################
     .align 32
-    .code32
 global_stack_section:
     .fill 512, 1, 0
     .set global_stack_section_len, (. - global_stack_section)
@@ -543,20 +638,17 @@ global_stack_section:
 # Global stack in protect mode / r3, the size is 512 bytes. #
 #############################################################
     .align 32
-    .code32
 r3_stack_section:
     .fill 512, 1, 0
     .set r3_stack_section_len, (. - r3_stack_section)
 
 
-    .code32
     .align 32
 TSS_SECTION:
     DEF_TSS(global_stack_section_len, GDT_SELECTOR_STACK)
     .set tss_len, (. - TSS_SECTION)
 
-    // .align 16
-    // .code16
+
 init_loader_msg:
     .asciz "Init loader ...\r\n"
 init_GDT_msg:
