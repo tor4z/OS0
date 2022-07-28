@@ -138,6 +138,11 @@
 #define PG_G        0x00
 
 
+#define MEM_INFO_NO_SET 0
+#define MEM_INFO_SUCCESS 1
+#define MEM_INFO_FAIL 2
+
+
 #ifdef __ASSEMBLER__
 
 #define DEF_GDT_NULL    \
