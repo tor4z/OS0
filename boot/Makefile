@@ -1,12 +1,11 @@
 CFLAGS += -I./include
 
-
 .PHONY: all
 all: loader.bin boot.bin
 
 
 boot.o: boot.S
-	$(AS) $(ASFLAGS) $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 
 loader.o: loader.S
@@ -25,4 +24,4 @@ loader.bin: loader.o
 
 .PHONY: clean
 clean:
-	@-rm -rf *.o *.out *.bin
+	@-rm -rf *.o *.out *.bin *.d

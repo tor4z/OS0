@@ -1,6 +1,7 @@
 #ifndef LOADER_H_
 #define LOADER_H_
 
+
 // Present bit. Allows an entry to refer to a valid segment.
 // Must be set (1) for any valid segment.
 #define GDT_ACCESS_BYTE_P   0x80
