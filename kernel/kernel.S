@@ -4,4 +4,5 @@ _start:
     movb $0x0f, %ah
     movb $0x4b, %al
     movw %ax, %es:0
+    call kmain
     jmp .
