@@ -1,41 +1,5 @@
 .include "def.S"
 
-/*****************************************************
- * @function: clean screen                           *
- * @parameter:                                       *
- *   Nothing                                         *
- * @return                                           *
- *   Nothing                                         *
- * ***************************************************/
-    .code16
-    .type clean_screen, @function
-clean_screen:
-    /* ah: function code
-     * al: number of line to scroll, 00h for entire window
-     * ch, cl: row, col of window's upper left corner
-     * dh, dl: row, col of window's lower right corner
-     */
-    pushw %ax
-    pushw %bx
-    pushw %cx
-    pushw %dx
-
-    movw $0x0600, %ax       /* Set ah to 06h, set al to 00h */
-    movw $0x0700, %bx       /* Set font color, and background color */
-    movw $0x0, %cx          /* Set upper left corner to (0, 0) */
-    movw $0x1850, %dx       /* Set lower right corner to (80, 24) */
-    int $0x10               /* interrupt */
-    movb $0x02, %ah
-    movb $0x0, %bh
-    movw $0x0, %dx
-    int $0x10
-clean_screen_ret:
-    popw %dx
-    popw %cx
-    popw %bx
-    popw %ax
-    ret
-
 
 /****************************************************************
  * @fnnction: print a string                                    *
@@ -168,7 +132,7 @@ logical_to_physical_ret:
 /******************************************************
  * @function: find file                               *
  * @parameter:                                        *
- *   ax: the address of filename                      *
+ *   bx: the address of filename                      *
  * @return                                            *
  *   ax: the start logic cluster                      *
  ******************************************************/
@@ -177,7 +141,6 @@ logical_to_physical_ret:
     .code16
     .type find_file, @function
 find_file:
-    pushw %bx
     pushw %dx
     pushw %cx
     pushw %di
@@ -186,8 +149,10 @@ find_file:
     movw $ROOT_DIR_BEGIN_SECTOR_INDEX, %ax
 find_file_loop:
     movw $1, %cx                    /* We read 1 sector once */
+    pushw %bx                       /* We reuse bx register */
     movw $TEMP_MEM, %bx
     call read_sector
+    popw %bx
 
     movw $TEMP_MEM, %di
     movw $NUM_DIR_ENTRY_A_SECTOR, %dx
@@ -200,7 +165,7 @@ find_file_cmp:
     addw $32, %di
     subw %bx, %si
     subw %si, %di
-    dec %dx
+    decw %dx
     cmpw $0, %dx
     jnz find_file_cmp
     inc %ax
@@ -217,7 +182,6 @@ find_file_ret:
     popw %di
     popw %cx
     popw %dx
-    popw %bx
     ret
 
 
@@ -227,28 +191,40 @@ find_file_ret:
  *   ax: begin sector                              *
  *   bx: target address                            *
  * @return                                         *
- *   Nothing                                       *
+ *   cx: number of sector we have read             *
  ***************************************************/
     .code16
     .type read_file, @function
 read_file:
-    pushw %cx
     pushw %dx
 
+    xorw %cx, %cx
 read_file_loop:
     movw %ax, %dx
     call logical_to_physical
+
+    pushw %cx
     movw $1, %cx
     call read_sector
+    popw %cx
+    incw %cx
+
+    pushw %ax
+    pushw %bx
+    movb $0x0e, %ah
+    movb $0x2e, %al
+    movw 0x000f, %bx
+    int $0x10
+    popw %bx
+    popw %ax
+
     movw %dx, %ax
     call query_FAT1
     cmpw $0xfff, %ax
     je read_file_ret
-    addw $512, %bx
     jmp read_file_loop
 read_file_ret:
     popw %dx
-    popw %cx
     ret
 
 

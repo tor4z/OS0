@@ -19,11 +19,10 @@ boot_entry:
     movw %ax, %ss
     movw $BaseOfStack, %sp
 
-    call clean_screen
     call reset_sector
     call read_FAT1
 read_loader:
-    leaw loader_filename, %ax
+    leaw loader_filename, %bx
     call find_file
     // the start logical cluster is stored in ax register
     movw $LOADER_ADDR, %bx

@@ -17,10 +17,19 @@ start:
     movb $0x03, %al
     int $0x10
 
-    movb $80, %ds:SCRN_W_ADDR
-    movb $25, %ds:SCRN_H_ADDR
-    movb $0, %ds:SCRN_X_ADDR
-    movb $0, %ds:SCRN_Y_ADDR
+    movl $80, %ds:SCRN_W_ADDR
+    movl $25, %ds:SCRN_H_ADDR
+    movl $0, %ds:SCRN_X_ADDR
+    movl $0, %ds:SCRN_Y_ADDR
+
+read_kernel:
+    call reset_sector
+    leaw kernel_filename, %bx
+    call find_file
+    /* the start logical cluster is stored in ax register */
+    movw $KERNEL_TMP_ADDR, %bx
+    call read_file
+    movw %cx, %ds:KERNEL_SIZE
 
     /*
     movb $0x02, %ah
@@ -41,56 +50,47 @@ start:
     outb %al, $0x60
     call wait_kb_out
 
-    call reset_sector
-read_kernel:
-    leaw kernel_filename, %ax
-    call find_file
-    /* the start logical cluster is stored in ax register */
-    movw $KERNEL_ADDR, %bx
-    call read_file
+    // /* set GDT code descroptor base */
+    // movl $protect_mod, %eax
+    // movl $GDT_CODE, %ebx
+    // call set_dt
 
+    // /* set call gate descroptor base */
+    // movl $call_gate_code, %eax
+    // movl $GDT_CG_CODE, %ebx
+    // call set_dt
 
-    /* set GDT code descroptor base */
-    movl $protect_mod, %eax
-    movl $GDT_CODE, %ebx
-    call set_dt
+    // /* set LDT descriptor base */
+    // movl $LDT0, %eax
+    // movl $GDT_LDT, %ebx
+    // call set_dt
 
-    /* set call gate descroptor base */
-    movl $call_gate_code, %eax
-    movl $GDT_CG_CODE, %ebx
-    call set_dt
+    // /* set rin3 descriptor base */
+    // movl $code_ring_3, %eax
+    // movl $GDT_R3_CODE, %ebx
+    // call set_dt
 
-    /* set LDT descriptor base */
-    movl $LDT0, %eax
-    movl $GDT_LDT, %ebx
-    call set_dt
+    // /* set global stack base */
+    // movl $global_stack_section, %eax
+    // movl $GDT_GLOBAL_STACK, %ebx
+    // call set_dt
 
-    /* set rin3 descriptor base */
-    movl $code_ring_3, %eax
-    movl $GDT_R3_CODE, %ebx
-    call set_dt
-
-    /* set global stack base */
-    movl $global_stack_section, %eax
-    movl $GDT_GLOBAL_STACK, %ebx
-    call set_dt
-
-    /* set rin3 stack base */
-    movl $r3_stack_section, %eax
-    movl $GDT_R3_STACK, %ebx
-    call set_dt
+    // /* set rin3 stack base */
+    // movl $r3_stack_section, %eax
+    // movl $GDT_R3_STACK, %ebx
+    // call set_dt
 
     /* set TSS descriptor base */
-    movl $TSS_SECTION, %eax
-    movl $GDT_TSS, %ebx
-    call set_dt
+    // movl $TSS_SECTION, %eax
+    // movl $GDT_TSS, %ebx
+    // call set_dt
 
     lgdt GDTR0
     movl %cr0, %eax
     or $0x1, %eax
     movl %eax, %cr0
 
-    jmp $GDT_SELECTOR_CODE, $0x0
+    jmp $GDT_SELECTOR_CODE, $protect_mod
 
 
 
@@ -131,6 +131,7 @@ wait_kb_out:
     jnz wait_kb_out
     ret
 
+    .include "include/boothdr.S"
 
 /*************************************************
  *              32-bit code                      *
@@ -140,11 +141,12 @@ wait_kb_out:
 protect_mod:
     movw $GDT_SELECTOR_DATA, %ax
     movw %ax, %ds
-    movw %ax, %es
     movw %ax, %fs
     movw %ax, %gs
     movw $GDT_SELECTOR_STACK, %ax
     movw %ax, %ss
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %es
     movl $global_stack_section_len, %esp    /* stack top */
 
     /*
@@ -152,75 +154,63 @@ protect_mod:
     call print_string_32
     */
 
-    call $CG_SELECTOR_CODE, $0x0
+    // call $CG_SELECTOR_CODE, $0x0
 
     movw $GDT_SELECTOR_TSS, %ax
     ltr %ax
 
-    /* push type should be consistent with stack alignment */
-    pushl $GDT_SELECTOR_R3_STACK
-    pushl $r3_stack_section_len             /* stack top of r3 */
-    pushl $GDT_SELECTOR_R3_CODE
-    pushl $0
-    retf
+    movl %ds:KERNEL_SIZE, %ecx
+    shll $9, %ecx
+    movl $KERNEL_TMP_ADDR, %esi
+    movl $KERNEL_ADDR, %edi
+    call memcpy
 
-    // jump to ldt
-    movw $GDT_SELECTOR_LDT, %ax
-    lldt %ax
-    jmp $LDT_SELECTOR_CODE, $ldt_protect_mode
+    jmp KERNEL_ENTRY
+
+    // /* push type should be consistent with stack alignment */
+    // pushl $GDT_SELECTOR_R3_STACK
+    // pushl $r3_stack_section_len             /* stack top of r3 */
+    // pushl $GDT_SELECTOR_R3_CODE
+    // pushl $0
+    // retf
+
+    // // jump to ldt
+    // movw $GDT_SELECTOR_LDT, %ax
+    // lldt %ax
+    // jmp $LDT_SELECTOR_CODE, $ldt_protect_mode
 protect_mod_fin:
     hlt
     jmp protect_mod_fin
 
-    .set protect_mod_len, (. - protect_mod)
 
-
-
+/*******************************************************
+ * @function: memory copy                              *
+ * @parameter:                                         *
+ *   esi: the source address                           *
+ *   edi: the target address                           *
+ *   ecx: number of byte to move                       *
+ * @return:                                            *
+ *   Nothing                                           *
+ *******************************************************/
     .code32
-ldt_protect_mode:
-    movw $0x0f4c, %ax           /* print L */
-    movl $VIDEO_MEM, %ebx
-    movw %ax, (%ebx)
-ldt_protect_mode_fin:
-    hlt
-    jmp ldt_protect_mode_fin
+    .type memcpy, @function
+memcpy:
+    pushl %eax
+    pushl %ebx
 
-
-    .code32
-    .type call_gate_code, @function
-call_gate_code:
-    movw $GDT_SELECTOR_VGA_MEM, %ax
-    movw %ax, %ds
-    movl $0, %ebx
-    movw $0x0f43, %ax           /* print C */
-    movw %ax, (%ebx)
-call_gate_code_ret:
-    retf
-
-    .set call_gate_code_len, (. - call_gate_code)
-
-
-    .code32
-    .type code_ring_3, @function
-code_ring_3:
-    movw $GDT_SELECTOR_VGA_MEM, %ax
-    movw %ax, %ds
-    movl $0, %ebx
-    movw $0x0f33, %ax       /* print 3 */
-    movw %ax, (%ebx)
-    /* ring3 to ring0 */
-    call $CG_SELECTOR_CODE, $0x0
-code_ring_3_fin:
-    /* Since issuing the HLT instruction requires ring 0 access,
-     * it can only be run by privileged system software such as
-     * the kernel.
-     */
-    /* hlt */
-    jmp code_ring_3_fin
-
-    .set code_ring_3_len, (. - code_ring_3)
-
-
+    cld
+    movl %edi, %ebx
+    xorl %edi, %edi
+    shrl $2, %ecx
+memcpy_loop:
+    lodsl
+    movl %eax, %ds:0(%ebx, %edi, 4)
+    incl %edi
+    loop memcpy_loop
+memcpy_ret:
+    popl %ebx
+    popl %eax
+    ret
 
 /*******************************************************
  * @function: print a string in 32-bit protection mode *
@@ -338,8 +328,52 @@ scroll_line_ret:
     popl %ebx
     popl %eax
     popl %esi
-
     ret
+
+
+    .code32
+ldt_protect_mode:
+    movw $0x0f4c, %ax           /* print L */
+    movl $VIDEO_MEM, %ebx
+    movw %ax, (%ebx)
+ldt_protect_mode_fin:
+    hlt
+    jmp ldt_protect_mode_fin
+
+
+    .code32
+    .type call_gate_code, @function
+call_gate_code:
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %ds
+    movl $0, %ebx
+    movw $0x0f43, %ax           /* print C */
+    movw %ax, (%ebx)
+call_gate_code_ret:
+    retf
+
+    .set call_gate_code_len, (. - call_gate_code)
+
+
+    .code32
+    .type code_ring_3, @function
+code_ring_3:
+    movw $GDT_SELECTOR_VGA_MEM, %ax
+    movw %ax, %ds
+    movl $0, %ebx
+    movw $0x0f33, %ax       /* print 3 */
+    movw %ax, (%ebx)
+    /* ring3 to ring0 */
+    call $CG_SELECTOR_CODE, $0x0
+code_ring_3_fin:
+    /* Since issuing the HLT instruction requires ring 0 access,
+     * it can only be run by privileged system software such as
+     * the kernel.
+     */
+    /* hlt */
+    jmp code_ring_3_fin
+
+    .set code_ring_3_len, (. - code_ring_3)
 
 
     .align 32
@@ -348,7 +382,7 @@ GDT_0:
 GDT_CODE:
     DEF_GDT(
         0x0,
-        protect_mod_len,
+        0xfffff,
         GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S |
             GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_RW,
         GDT_FLAGS_G | GDT_FLAGS_DB
@@ -448,23 +482,21 @@ LDT0:
         GDT_FLAGS_DB
     )               /* ldt for test, 0x0 */
 
-
 /************************************************************
-* Global stack in protect mode, the size is 512 bytes.      *
+* Global stack in protect mode, the size is 64 bytes.      *
 *************************************************************/
     .align 32
     .code32
 global_stack_section:
-    .fill 512, 1, 0
+    .fill 64, 1, 0
     .set global_stack_section_len, (. - global_stack_section)
 
-
 /************************************************************
-* Global stack in protect mode / r3, the size is 512 bytes. *
+* Global stack in protect mode / r3, the size is 32 bytes. *
 *************************************************************/
     .align 32
 r3_stack_section:
-    .fill 512, 1, 0
+    .fill 32, 1, 0
     .set r3_stack_section_len, (. - r3_stack_section)
 
 
@@ -481,7 +513,3 @@ init_loader_msg:
     .asciz "Init loader ...\r\n"
 init_GDT_msg:
     .asciz "Init GDT ...\r\n"
-
-
-    .include "include/boothdr.S"
-
