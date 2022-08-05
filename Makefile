@@ -5,6 +5,7 @@ MAKE := make
 OBJCOPY := objcopy
 QEMU := qemu-system-i386
 BOCHS := bochs
+ROOT_PATH := $(shell pwd)
 
 BOOT_ENTRY := 0x7c00
 LOADER_ENTRY := 0x9200
@@ -12,6 +13,7 @@ KERNEL_ENTRY := 0x30400
 CFLAGS := -Wall -nostdinc -fno-builtin -m32 -MD
 CFLAGS += -Wno-format -Wno-unused -Werror
 CFLAGS += -fno-omit-frame-pointer
+CFLAGS += -I$(ROOT_PATH)/include
 ASFLAGS := --32
 LDFLAGS := -m elf_i386
 
@@ -72,7 +74,7 @@ qemu: build
 
 .PHONY: bochs
 bochs: build bochsrc.yaml
-	$(BOCHS) -f bochsrc.yaml
+	$(BOCHS) -q -f bochsrc.yaml
 
 
 .PHONY: rebuild_qemu

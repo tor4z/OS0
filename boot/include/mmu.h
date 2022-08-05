@@ -1,5 +1,5 @@
-#ifndef LOADER_H_
-#define LOADER_H_
+#ifndef MMU_H_
+#define MMU_H_
 
 
 // Present bit. Allows an entry to refer to a valid segment.
@@ -133,7 +133,7 @@
     .int 0;                 /*ESP1         | 0x0c*/ \
     .int 0;                 /*SS1          | 0x10*/ \
     .int 0;                 /*ESP2         | 0x14*/ \
-    .int 0;                 /*SS1          | 0x18*/ \
+    .int 0;                 /*SS2          | 0x18*/ \
     .int 0;                 /*CR3          | 0x1c*/ \
     .int 0;                 /*EIP          | 0x20*/ \
     .int 0;                 /*EFLAGS       | 0x24*/ \
@@ -152,7 +152,7 @@
     .int 0;                 /*FS           | 0x58*/ \
     .int 0;                 /*GS           | 0x5c*/ \
     .int 0;                 /*LDTR         | 0x60*/ \
-    .word 0;                 /*LDTR         | 0x60*/ \
+    .word 0;                /*TRAP         | 0x60*/ \
     .word (. - TSS_SECTION + 2);             /*I/O MAP base | 0x64*/ \
     .byte 0xff;             /*end          | 0x68*/
 
@@ -171,4 +171,4 @@ struct gdt
 
 #endif // __ASSEMBLER__
 
-#endif // LOADER_H_
+#endif // MMU_H_

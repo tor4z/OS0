@@ -143,10 +143,9 @@ protect_mod:
     movw %ax, %ds
     movw %ax, %fs
     movw %ax, %gs
+    movw %ax, %es
     movw $GDT_SELECTOR_STACK, %ax
     movw %ax, %ss
-    movw $GDT_SELECTOR_VGA_MEM, %ax
-    movw %ax, %es
     movl $global_stack_section_len, %esp    /* stack top */
 
     /*
@@ -159,11 +158,9 @@ protect_mod:
     movw $GDT_SELECTOR_TSS, %ax
     ltr %ax
 
-    movl %ds:KERNEL_SIZE, %ecx
-    shll $9, %ecx
-    movl $KERNEL_TMP_ADDR, %esi
-    movl $KERNEL_ADDR, %edi
-    call memcpy
+    pushl $KERNEL_TMP_ADDR
+    call static_elf_loader
+    addl $4, %esp
 
     jmp KERNEL_ENTRY
 
@@ -184,32 +181,127 @@ protect_mod_fin:
 
 
 /*******************************************************
+ * @function: static ELF loader                        *
+ * @parameter:                                         *
+ *   8(ebp): the elf address                           *
+ * @return:                                            *
+ *   Nothing                                           *
+ *******************************************************/
+    .code32
+    .type static_elf_loader, @function
+static_elf_loader:
+    pushl %ebp
+    movl %esp, %ebp
+    subl $4, %esp
+    /* local variable
+     * -4(ebp): curr_ph_addr
+     */
+    pushl %ecx
+    pushl %eax
+    pushl %esi
+    pushl %edi
+
+    movl 8(%ebp), %eax
+    movzx ELF_PHNUM_OFFSET(%eax), %ecx        /* read the number program header */
+    movl 8(%ebp), %eax
+    addl $ELF_PH_OFFSET, %eax               /* skip ELF file header */
+    movl %eax, -4(%ebp)
+read_elf_ph:
+    movl -4(%ebp), %esi
+    movl ELF_PH_TYPE_OFFSET(%esi), %eax
+    cmpl $ELF_PT_LOAD, %eax                 /* jump to next item if it is */
+    jnz read_next_elf_ph                    /* not a loadable segment */
+    movl ELF_PH_FILESZ_OFFSET(%esi), %eax
+    pushl %eax
+    movl ELF_PH_VADDR_OFFSET(%esi), %eax
+    pushl %eax
+    movl ELF_PH_OFFSET_OFFSET(%esi), %eax
+    addl 8(%ebp), %eax
+    pushl %eax
+    call memcpy
+    addl $12, %esp
+read_next_elf_ph:
+    addl $ELF_PH_SIZE, -4(%ebp)
+    loop read_elf_ph
+init_bss:
+    movl 8(%ebp), %eax
+    movl ELF_SHOFF_OFFSET(%eax), %esi
+    addl 8(%ebp), %esi
+    movzx ELF_SHNUM_OFFSET(%eax), %ecx
+read_elf_sh:
+    movl ELF_SH_TYPE_OFFSET(%esi), %eax
+    cmpl $ELF_SHT_NOBITS, %eax
+    jnz read_next_elf_sh
+set_bss_area_zero:
+    movl ELF_SH_SIZE_OFFSET(%esi), %ecx
+    movb $0x0, %al
+    movl ELF_SH_ADDR_OFFSET(%esi), %edi
+    cld
+    rep stosb
+    jmp static_elf_loader_ret
+read_next_elf_sh:
+    addl $ELF_SH_SIZE, %esi
+    loop read_elf_sh
+static_elf_loader_ret:
+    addl $4, %esp
+    popl %edi
+    popl %esi
+    popl %eax
+    popl %ecx
+    movl %ebp, %esp
+    popl %ebp
+    ret
+
+/*******************************************************
  * @function: memory copy                              *
  * @parameter:                                         *
- *   esi: the source address                           *
- *   edi: the target address                           *
- *   ecx: number of byte to move                       *
+ *   8(ebp): the source address                        *
+ *   12(ebp): the target address                       *
+ *   16(ebp): number of byte to copy                   *
  * @return:                                            *
  *   Nothing                                           *
  *******************************************************/
     .code32
     .type memcpy, @function
 memcpy:
+    pushl %ebp
+    movl %esp, %ebp
     pushl %eax
     pushl %ebx
+    pushl %esi
+    pushl %edi
+    pushl %ecx
 
-    cld
-    movl %edi, %ebx
-    xorl %edi, %edi
+    movl 8(%ebp), %esi
+    movl 12(%ebp), %ebx
+    movl 16(%ebp), %ecx
     shrl $2, %ecx
+    xorl %edi, %edi
+    cld
 memcpy_loop:
     lodsl
-    movl %eax, %ds:0(%ebx, %edi, 4)
+    movl %eax, (%ebx, %edi, 4)
     incl %edi
     loop memcpy_loop
+memcpy_remain:
+    movl 16(%ebp), %ecx
+    orl $3, %ecx
+    leal (%ebx, %edi, 4), %eax
+    movl %eax, %ebx
+    xorl %edi, %edi
+memcpy_remain_loop:
+    lodsb
+    movb %al, (%ebx, %edi, 1)
+    incl %edi
+    loop memcpy_remain_loop
 memcpy_ret:
+    popl %ecx
+    popl %esi
+    popl %esi
     popl %ebx
     popl %eax
+    movl %ebp, %esp
+    popl %ebp
     ret
 
 /*******************************************************
@@ -488,7 +580,7 @@ LDT0:
     .align 32
     .code32
 global_stack_section:
-    .fill 64, 1, 0
+    .fill 4096, 1, 0
     .set global_stack_section_len, (. - global_stack_section)
 
 /************************************************************
