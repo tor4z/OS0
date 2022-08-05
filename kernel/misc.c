@@ -3,5 +3,5 @@
 
 void pause()
 {
-    __asm__("jmp .");
+    __asm__ __volatile__("jmp .");
 }

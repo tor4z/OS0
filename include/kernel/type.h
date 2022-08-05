@@ -12,5 +12,6 @@ typedef unsigned char uint8_t;
 
 typedef unsigned int sizet_t;
 
+typedef void (*int_handler)();
 
 #endif // TYPE_H_

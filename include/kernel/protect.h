@@ -103,6 +103,9 @@
 #define CALL_GATE_P     0x1
 #define CALL_GATE_NP    0x0
 
+#define GDT_SIZE    64
+#define LDT_SIZE    GDT_SIZE
+
 
 struct gdt
 {
@@ -115,10 +118,10 @@ struct gdt
 };
 
 
-struct gdt_ptr
+struct gdtr
 {
     uint16_t size;
-    uint32_t base;
+    struct gdt *base;
 };
 
 
@@ -170,7 +173,7 @@ struct idt
     uint16_t offset0_15;
     uint16_t selector;
     uint8_t zero;
-    uint8_t ettr;
+    uint8_t attr;
     uint16_t offset16_31;
 };
 
@@ -178,5 +181,20 @@ struct idt
 #define SELECTOR_CODE 0x8
 #define SELECTOR_DATA 0x10
 
+
+void init_gdt(
+    struct gdt *gdt_ptr, uint32_t base, uint32_t limit,
+    uint8_t access, uint8_t flags
+);
+void init_ldt(
+    struct gdt *gdt_ptr, uint32_t base, uint32_t limit,
+    uint8_t access, uint8_t flags
+);
+void init_idt(
+    struct idt *idt_ptr, uint32_t offset, uint16_t selector,
+    uint8_t attr
+);
+void init_tss(struct tss *tss_ptr, uint32_t stack_top, uint32_t selector);
+void setup_gdtr();
 
 #endif // PROTECT_H_

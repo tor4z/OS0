@@ -10,5 +10,8 @@
 int32_t putchar(char c);
 int32_t puts(const char *str);
 
+// IO manipulation
+void out_byte(uint8_t port, uint8_t data);
+uint8_t in_byte(uint8_t port);
 
 #endif // KIO_H_
