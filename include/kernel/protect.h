@@ -107,6 +107,34 @@
 #define LDT_SIZE    GDT_SIZE
 
 
+#define GDT_SELECTOR_NULL       0x0
+#define GDT_SELECTOR_CODE       0x8
+#define GDT_SELECTOR_DATA       0x10
+#define GDT_SELECTOR_LDT        0x18      // ldt
+#define GDT_SELECTOR_CG         0x20      // call gate
+#define GDT_SELECTOR_TASK       0x28
+#define CG_SELECTOR_CODE        (0x30 | SELECTOR_ATTR_PL3)
+#define GDT_SELECTOR_R3_CODE    (0x38 | SELECTOR_ATTR_PL3)
+#define GDT_SELECTOR_STACK      0x40
+#define GDT_SELECTOR_R3_STACK   (0x48 | SELECTOR_ATTR_PL3)
+#define GDT_SELECTOR_VGA_MEM    (0x50 | SELECTOR_ATTR_PL3)
+#define GDT_SELECTOR_TSS        0x58
+#define GDT_SELECTOR_PG_DIR     0x60
+#define GDT_SELECTOR_PG_TBL     0x68
+
+
+#define INT_GATE_TASK       0x05
+#define INT_GATE_INT16      0x06
+#define INT_GATE_TRAP16     0x07
+#define INT_GATE_INT32      0x0e
+#define INT_GATE_TRAP32     0x0f
+#define INT_GATE_PL0        0x00
+#define INT_GATE_PL1        0x20
+#define INT_GATE_PL2        0x40
+#define INT_GATE_PL3        0x60
+#define INT_GATE_P          0x80
+
+
 struct gdt
 {
     uint16_t limit0_15;
@@ -191,7 +219,7 @@ void init_ldt(
     uint8_t access, uint8_t flags
 );
 void init_idt(
-    struct idt *idt_ptr, uint32_t offset, uint16_t selector,
+    struct idt *idt_ptr, int_handler offset, uint16_t selector,
     uint8_t attr
 );
 void init_tss(struct tss *tss_ptr, uint32_t stack_top, uint32_t selector);

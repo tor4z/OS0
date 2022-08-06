@@ -1,2 +1,3 @@
 -I
 ./include
+-Wno-pointer-to-int-cast

@@ -36,10 +36,11 @@ void init_ldt(
 
 
 void init_idt(
-    struct idt *idt_ptr, uint32_t offset, uint16_t selector,
+    struct idt *idt_ptr, int_handler handler, uint16_t selector,
     uint8_t attr
 )
 {
+    uint32_t offset = (uint32_t)handler;
     idt_ptr->offset0_15 = offset & 0xffff;
     idt_ptr->selector = selector;
     idt_ptr->zero = 0;
