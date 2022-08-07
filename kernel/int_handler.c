@@ -1,5 +1,4 @@
 #include <kernel/kio.h>
-#include <stdint.h>
 #include "int_handler.h"
 
 
@@ -11,26 +10,26 @@ static void exception_handler(
 
 static char exp_msg[][64] =
 {
-    "DE: ",
-    "DB: ",
-    "NMI: ",
-    "BP: ",
-    "OF: ",
-    "BR: ",
-    "UD: ",
-    "NM: ",
-    "DF: ",
-    "CPS: ",
-    "TS: ",
-    "NP: ",
-    "SS: ",
-    "GP: ",
-    "PF: ",
+    "DE: Devide Error.",
+    "DB: code / data access",
+    "NMI: non-maskable interrupt",
+    "BP: break point",
+    "OF: overflow",
+    "BR: BOUND range exceeded ",
+    "UD: invalid opcode",
+    "NM: no math coprocessor",
+    "DF: double fault",
+    "CPS: coprocessor segment overrun",
+    "TS: invalid TSS",
+    "NP: segment not present",
+    "SS: stack segment fault",
+    "GP: general protection",
+    "PF: page fault",
     "NOTUSED: ",
-    "MF: ",
-    "AC: ",
-    "MC: ",
-    "XF: "
+    "MF: x87 FPU floating-point error",
+    "AC: alignment check",
+    "MC: mechine check",
+    "XF: SIMD floating-point exception"
 };
 
 

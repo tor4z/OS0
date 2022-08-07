@@ -1,7 +1,8 @@
-S_SRCS  := $(wildcard ./*.S)
-C_SRCS  := $(wildcard ./*.c)
+S_SRCS  := $(wildcard *.S)
+C_SRCS  := $(wildcard *.c)
 OBJS    := $(patsubst %.S,%.o,$(S_SRCS))
 OBJS    += $(patsubst %.c,%.o,$(C_SRCS))
+LDFLAGS += -L $(KLIB_SEARCH_PATH) -Bstatic -lk
 
 
 %.o: %.c
@@ -12,7 +13,7 @@ OBJS    += $(patsubst %.c,%.o,$(C_SRCS))
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-kernel.bin: $(OBJS)
+$(KERNEL): $(OBJS)
 	$(LD) $(LDFLAGS) -s -Ttext $(KERNEL_ENTRY) $^ -o $@
 
 

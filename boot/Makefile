@@ -1,7 +1,8 @@
 CFLAGS += -I./include
 
+
 .PHONY: all
-all: loader.bin boot.bin
+all: $(LOADER) $(BOOT)
 
 
 boot.o: boot.S
@@ -12,12 +13,12 @@ loader.o: loader.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
-boot.bin: boot.o
+$(BOOT): boot.o
 	$(LD) $(LDFLAGS) -Ttext $(BOOT_ENTRY) $< -o boot.out
 	$(OBJCOPY) -S -O binary boot.out $@
 
 
-loader.bin: loader.o
+$(LOADER): loader.o
 	$(LD) $(LDFLAGS) -N -e start -Ttext $(LOADER_ENTRY) $< -o loader.out
 	$(OBJCOPY) -S -O binary loader.out $@
 

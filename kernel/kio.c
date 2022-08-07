@@ -23,25 +23,24 @@ int32_t puts(const char *str)
 }
 
 
-void out_byte(uint8_t port, uint8_t data)
+void out_byte(uint16_t port, uint8_t data)
 {
     __asm__ __volatile__(
-        "movb %0, %%al\n\t"
-        "outb %%al, %1"
+        "outb %0, %1"
         : /* no putout */
-        : "i"(data), "i"(port)
+        : "a"(data), "Nd"(port)
         :
     );
 }
 
 
-uint8_t in_byte(uint8_t port)
+uint8_t in_byte(uint16_t port)
 {
-    uint8_t data;
+    uint8_t data = 0;
     __asm__ __volatile__(
-        "inb %1 %%al"
+        "inb %1, %0"
         : "=a"(data)
-        : "i"(port)
+        : "Nd"(port)
         :
     );
     return data;
