@@ -559,7 +559,6 @@ GDT_TSS:
         GDT_FLAGS_G | GDT_FLAGS_DB
     )                   /* TSS, 0x58 */
 
-
 GDTR0:
     .short (GDTR0 - GDT_0) - 1
     .int GDT_0

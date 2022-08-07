@@ -1,7 +1,7 @@
 #include <kernel/const.h>
 #include <kernel/protect.h>
-#include <kernel/global.h>
 #include <kernel/type.h>
+#include "global.h"
 
 
 void init_gdt(
@@ -51,6 +51,17 @@ void init_idt(
 
 void setup_gdtr()
 {
+    uint32_t base = (uint32_t)gdts;
     gdt_ptr.size = NUM_GDT * GDT_SIZE - 1;
-    gdt_ptr.base = gdts;
+    gdt_ptr.base_low = base & 0xffff;
+    gdt_ptr.base_high = (base >> 16) & 0xffff;
+}
+
+
+void setup_idtr()
+{
+    uint32_t base = (uint32_t)idts;
+    idt_ptr.size = NUM_IDT * IDT_SIZE - 1;
+    idt_ptr.base_low = base & 0xffff;
+    idt_ptr.base_high = (base >> 16) & 0xffff;
 }

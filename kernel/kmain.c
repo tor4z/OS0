@@ -1,5 +1,5 @@
 #include <kernel/kio.h>
-#include "kernel/vga.h"
+#include <kernel/vga.h>
 #include "misc.h"
 
 

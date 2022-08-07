@@ -4,6 +4,9 @@
 #define NUM_GDT 128
 #define NUM_IDT 256
 
+#define NUM_PDE 1024
+#define NUM_PTE (1024 * NUM_PDE)
+
 #define MASTER_8259A_P0 0x20
 #define SLAVE_8259A_P0  0xa0
 #define MASTER_8259A_P1 0x21

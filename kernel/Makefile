@@ -2,7 +2,8 @@ S_SRCS  := $(wildcard *.S)
 C_SRCS  := $(wildcard *.c)
 OBJS    := $(patsubst %.S,%.o,$(S_SRCS))
 OBJS    += $(patsubst %.c,%.o,$(C_SRCS))
-LDFLAGS += -L $(KLIB_SEARCH_PATH) -Bstatic -lk
+LDFLAGS += -L$(KLIB_SEARCH_PATH) -Bstatic
+LDLINK  += -lk
 
 
 %.o: %.c
@@ -14,7 +15,7 @@ LDFLAGS += -L $(KLIB_SEARCH_PATH) -Bstatic -lk
 
 
 $(KERNEL): $(OBJS)
-	$(LD) $(LDFLAGS) -s -Ttext $(KERNEL_ENTRY) $^ -o $@
+	$(LD) $(LDFLAGS) -s -Ttext $(KERNEL_ENTRY) $^ $(LDLINK) -o $@
 
 
 .PHONY: clean

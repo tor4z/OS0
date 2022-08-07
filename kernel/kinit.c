@@ -1,15 +1,113 @@
-#include "int_handler.h"
 #include <kernel/const.h>
 #include <kernel/type.h>
 #include <kernel/kio.h>
 #include <kernel/protect.h>
-#include <kernel/global.h>
+#include "global.h"
+#include "int_handler.h"
+#include "kinit.h"
 
 
 static void setup_8259a();
 
 
-void init_idts()
+void kinit()
+{
+    setup_gdts();
+    setup_gdtr();
+    setup_idtr();
+
+    __asm__ __volatile__(
+        "lgdt (%0)"
+        : /* no output */
+        : "r"(&gdt_ptr)
+        :
+    );
+
+    __asm__ __volatile__(
+        "ltr %%ax"
+        : /* no output */
+        : "a"(GDT_SELECTOR_TSS)
+        :
+    );
+
+    __asm__ __volatile__(
+        "lidt (%0)"
+        : /* no output */
+        : "r"(&idt_ptr)
+        :
+    );
+
+    setup_paging();
+    setup_idts();
+}
+
+void setup_paging()
+{
+    uint32_t pde0 = PAGE_TBL_BASE | PG_P | PG_RW_RW | PG_US_U;
+    uint32_t pte0 = PG_P | PG_RW_RW | PG_US_U;
+
+    __asm__ __volatile__(
+        ".set_pde:\n\t"
+        "stosl\n\t"
+        "addl $4096, %%eax\n\t"
+        "loop .set_pde"
+        : /* no output */
+        : "a"(pde0), "D"(PAGE_DIR_BASE), "c"(NUM_PDE)
+        : "memory"
+    );
+
+    __asm__ __volatile__(
+        ".set_pte:\n\t"
+        "stosl\n\t"
+        "addl $4096, %%eax\n\t"
+        "loop .set_pte\n\t"
+        : /* no output */
+        : "a"(pte0), "D"(PAGE_TBL_BASE), "c"(NUM_PTE)
+        : "memory"
+    );
+
+    __asm__ __volatile__(
+        "movl %%eax, %%cr3\n\t"
+        "movl %%cr0, %%eax\n\t"
+        "orl $0x80000000, %%eax\n\t"
+        "movl %%eax, %%cr0"
+        : /* no output */
+        : "a"(PAGE_DIR_BASE)
+        :
+    );
+}
+
+
+void setup_gdts()
+{
+    init_gdt(
+        &gdts[GDT_NULL_IDX], 0, 0, 0, 0
+    );
+    init_gdt(
+        &gdts[GDT_CODE_IDX], 0, 0xfffff,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S | GDT_ACCESS_BYTE_E |
+            GDT_ACCESS_BYTE_RW,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    );
+    init_gdt(
+        &gdts[GDT_DATA_IDX], 0, 0xfffff,
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S | GDT_ACCESS_BYTE_RW,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    );
+    init_gdt(
+        &gdts[GDT_TSS_IDX], (uint32_t)&tss, sizeof(struct tss),
+        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_A,
+        GDT_FLAGS_G | GDT_FLAGS_DB
+    );
+
+    for (int i = GDT_LDT0_IDX; i < NUM_GDT; ++i)
+    {
+        init_gdt(&gdts[i], 0, 0, 0, 0);
+    }
+}
+
+
+void setup_idts()
 {
     setup_8259a();
 
