@@ -19,4 +19,4 @@ $(KERNEL): $(OBJS)
 
 .PHONY: clean
 clean:
-	@-rm -f *.o *.bin
+	@-rm -f *.o *.bin *.d

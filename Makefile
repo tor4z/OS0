@@ -119,3 +119,4 @@ clean:
 	$(MAKE) -C $(BOOT_DIR) clean
 	$(MAKE) -C $(DOC_DIR) clean
 	$(MAKE) -C $(KERNEL_DIR) clean
+	$(MAKE) -C $(KLIB_DIR) clean
