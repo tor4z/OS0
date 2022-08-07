@@ -1,4 +1,7 @@
 #include <kernel/kio.h>
+#include <kernel/const.h>
+#include <kernel/type.h>
+#include <klib.h>
 #include "int_handler.h"
 
 
@@ -35,127 +38,127 @@ static char exp_msg[][64] =
 
 void phony_handler()
 {
-    puts("Phony interrupt handler");
+    kputs("Phony interrupt handler");
 }
 
 
-void de_handler()
+void de_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_DE, -1, eip, cs, eflags);
 }
 
 
-void db_handler()
+void db_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_DB, -1, eip, cs, eflags);
 }
 
 
-void nmi_handler()
+void nmi_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_NMI, -1, eip, cs, eflags);
 }
 
 
-void bp_handler()
+void bp_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_BP, -1, eip, cs, eflags);
 }
 
 
-void of_handler()
+void of_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_OF, -1, eip, cs, eflags);
 }
 
 
-void br_handler()
+void br_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_BR, -1, eip, cs, eflags);
 }
 
 
-void ud_handler()
+void ud_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_UD, -1, eip, cs, eflags);
 }
 
 
-void nm_handler()
+void nm_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_NM, -1, eip, cs, eflags);
 }
 
 
-void df_handler()
+void df_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_DF, err_code, eip, cs, eflags);
 }
 
 
-void cps_handler()
+void cps_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_CPS, -1, eip, cs, eflags);
 }
 
 
-void ts_handler()
+void ts_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_TS, err_code, eip, cs, eflags);
 }
 
 
-void np_handler()
+void np_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_NP, err_code, eip, cs, eflags);
 }
 
 
-void ss_handler()
+void ss_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_SS, err_code, eip, cs, eflags);
 }
 
 
-void gp_handler()
+void gp_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_GP, err_code, eip, cs, eflags);
 }
 
 
-void pf_handler()
+void pf_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_PF, err_code, eip, cs, eflags);
 }
 
 
-void notused_handler()
+void notused_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_NOTUSED, -1, eip, cs, eflags);
 }
 
 
-void mf_handler()
+void mf_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_MF, -1, eip, cs, eflags);
 }
 
 
-void ac_handler()
+void ac_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_AC, err_code, eip, cs, eflags);
 }
 
 
-void mc_handler()
+void mc_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_MC, -1, eip, cs, eflags);
 }
 
 
-void xf_handler()
+void xf_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-
+    exception_handler(INT_VEC_XF, -1, eip, cs, eflags);
 }
 
 
@@ -266,5 +269,19 @@ static void exception_handler(
     uint32_t eip, uint32_t cs, uint32_t eflags
 )
 {
+    char buff[16];
 
+    kprint("error code: ");
+    kprint(itoa(err_code, buff, 16));
+    kputchar('\n');
+
+    kprint("eip: ");
+    kprint(itoa(eip, buff, 16));
+    kputchar('\n');
+
+    kprint("cs: ");
+    kprint(itoa(cs, buff, 16));
+    kputchar('\n');
+
+    kputs(exp_msg[vec_no]);
 }

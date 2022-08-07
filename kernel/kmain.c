@@ -6,8 +6,8 @@
 int kmain()
 {
     clean_screen();
-    puts("Hello world");
-    putchar('X');
+    kputs("Hello world");
+    kputchar('X');
     pause();
     return 0;
 }

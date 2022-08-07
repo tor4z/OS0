@@ -219,7 +219,7 @@ void init_ldt(
     uint8_t access, uint8_t flags
 );
 void init_idt(
-    struct idt *idt_ptr, int_handler offset, uint16_t selector,
+    struct idt *idt_ptr, uint32_t offset, uint16_t selector,
     uint8_t attr
 );
 void init_tss(struct tss *tss_ptr, uint32_t stack_top, uint32_t selector);

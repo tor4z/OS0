@@ -1,29 +1,30 @@
 #ifndef INT_HANDLER_H_
 #define INT_HANDLER_H_
 
+#include <kernel/type.h>
 
 void phony_handler();
 
-void de_handler();
-void db_handler();
-void nmi_handler();
-void bp_handler();
-void of_handler();
-void br_handler();
-void ud_handler();
-void nm_handler();
-void df_handler();
-void cps_handler();
-void ts_handler();
-void np_handler();
-void ss_handler();
-void gp_handler();
-void pf_handler();
-void notused_handler();
-void mf_handler();
-void ac_handler();
-void mc_handler();
-void xf_handler();
+void de_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void db_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void nmi_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void bp_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void of_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void br_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void ud_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void nm_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void df_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
+void cps_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void ts_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
+void np_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
+void ss_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
+void gp_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
+void pf_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
+void notused_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void mf_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void ac_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
+void mc_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
+void xf_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
 
 void irq0_handler();
 void irq1_handler();

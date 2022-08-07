@@ -36,7 +36,7 @@ void init_ldt(
 
 
 void init_idt(
-    struct idt *idt_ptr, int_handler handler, uint16_t selector,
+    struct idt *idt_ptr, uint32_t handler, uint16_t selector,
     uint8_t attr
 )
 {

@@ -17,159 +17,159 @@ void init_idts()
     for (int i = 0; i < NUM_IDT; ++i)
     {
         init_idt(
-            &idts[i], phony_handler, GDT_SELECTOR_CODE,
+            &idts[i], (uint32_t)phony_handler, GDT_SELECTOR_CODE,
             INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
         );        
     }
 
     init_idt(
-        &idts[INT_VEC_DE], de_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_DE], (uint32_t)de_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_DB], db_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_DB], (uint32_t)db_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_NMI], nmi_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_NMI], (uint32_t)nmi_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_BP], bp_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_BP], (uint32_t)bp_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_OF], of_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_OF], (uint32_t)of_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_BR], br_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_BR], (uint32_t)br_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_UD], ud_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_UD], (uint32_t)ud_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_NM], nm_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_NM], (uint32_t)nm_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_DF], df_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_DF], (uint32_t)df_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_CPS], cps_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_CPS], (uint32_t)cps_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_TS], ts_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_TS], (uint32_t)ts_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_NP], np_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_NP], (uint32_t)np_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_SS], ss_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_SS], (uint32_t)ss_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_GP], gp_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_GP], (uint32_t)gp_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_PF], pf_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_PF], (uint32_t)pf_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_NOTUSED], notused_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_NOTUSED], (uint32_t)notused_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_MF], mf_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_MF], (uint32_t)mf_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_AC], ac_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_AC], (uint32_t)ac_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_MC], mc_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_MC], (uint32_t)mc_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_XF], xf_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-
-    init_idt(
-        &idts[INT_VEC_IRQ0], irq0_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ1], irq1_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ2], irq2_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ3], irq3_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ4], irq4_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ5], irq5_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ6], irq6_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ7], irq7_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ8], irq8_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ9], irq9_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ10], irq10_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ11], irq11_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ12], irq12_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ13], irq13_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ14], irq14_handler, GDT_SELECTOR_CODE,
-        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-    );
-    init_idt(
-        &idts[INT_VEC_IRQ15], irq15_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_XF], (uint32_t)xf_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
 
     init_idt(
-        &idts[INT_VEC_SYSCALL], syscall_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ0], (uint32_t)irq0_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ1], (uint32_t)irq1_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ2], (uint32_t)irq2_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ3], (uint32_t)irq3_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ4], (uint32_t)irq4_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ5], (uint32_t)irq5_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ6], (uint32_t)irq6_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ7], (uint32_t)irq7_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ8], (uint32_t)irq8_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ9], (uint32_t)irq9_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ10], (uint32_t)irq10_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ11], (uint32_t)irq11_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ12], (uint32_t)irq12_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ13], (uint32_t)irq13_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ14], (uint32_t)irq14_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+    init_idt(
+        &idts[INT_VEC_IRQ15], (uint32_t)irq15_handler, GDT_SELECTOR_CODE,
+        INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
+    );
+
+    init_idt(
+        &idts[INT_VEC_SYSCALL], (uint32_t)syscall_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL3 | INT_GATE_INT32
     );
 }

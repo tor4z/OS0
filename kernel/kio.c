@@ -3,14 +3,14 @@
 #include <kernel/type.h>
 
 
-int32_t putchar(char c)
+int32_t kputchar(char c)
 {
     write_screen(c);
     return (int)c;
 }
 
 
-int32_t puts(const char *str)
+int32_t kputs(const char *str)
 {
     while (*str)
     {
@@ -20,6 +20,20 @@ int32_t puts(const char *str)
     write_screen('\n');
     return 0;
     // return EOF;  // on error
+}
+
+
+int32_t kprint(const char *str)
+{
+    int32_t i = 0;
+    while (*str)
+    {
+        write_screen(*str);
+        ++str;
+        ++i;
+    }
+    return i;
+    // return -1;  // on error
 }
 
 
