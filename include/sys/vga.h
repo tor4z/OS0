@@ -1,7 +1,7 @@
 #ifndef VGA_H_
 #define VGA_H_
 
-#include <kernel/type.h>
+#include <type.h>
 
 
 #define VGA_ADDR 0xb8000

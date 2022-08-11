@@ -1,7 +1,7 @@
 #ifndef KIO_H_
 #define KIO_H_
 
-#include <kernel/type.h>
+#include <type.h>
 
 
 #define EOF -1

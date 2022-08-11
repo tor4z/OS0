@@ -1,4 +1,5 @@
 #include <klib.h>
+#include <type.h>
 
 
 static void swap(char *a, char *b);
@@ -11,10 +12,18 @@ char *itoa (int value, char *str, int base)
 
     if(base == 2)
     {
-        while (value)
+        uint32_t v = (uint32_t)value;
+
+        if(v == 0)
         {
-            *s = (value % 2) + '0';
-            value /= 2;
+            *s = '0';
+            ++s;
+        }
+
+        while (v)
+        {
+            *s = (v % 2) + '0';
+            v /= 2;
             ++s;
         }
 
@@ -28,10 +37,12 @@ char *itoa (int value, char *str, int base)
     }
     else if(base == 8)
     {
-        while (value)
+        uint32_t v = (uint32_t)value;
+
+        while (v)
         {
-            *s = (value % 8) + '0';
-            value /= 8;
+            *s = (v % 8) + '0';
+            v /= 8;
             ++s;
         }
         
@@ -44,15 +55,22 @@ char *itoa (int value, char *str, int base)
     else if(base == 16)
     {
         int t;
+        uint32_t v = (uint32_t)value;
 
-        while (value)
+        if (v == 0)
         {
-            t = (value % 16);
+            *s = '0';
+            ++s;
+        }
+
+        while (v)
+        {
+            t = (v % 16);
             if(t > 9)
                 *s = t + 'a' - 10;
             else
                 *s = t + '0';
-            value /= 16;
+            v /= 16;
             ++s;
         }
 
@@ -66,10 +84,31 @@ char *itoa (int value, char *str, int base)
     }
     else if (base == 10)
     {
+        int negtive = 0;
+
+        if(value < 0)
+        {
+            negtive = 1;
+            value *= -1;
+        }
+
+        if (value == 0)
+        {
+            *s = 0;
+            ++s;
+        }
+
         while (value)
         {
             *s = (value % 10) + '0';
             value /= 10;
+            ++s;
+        }
+
+
+        if (negtive)
+        {
+            *s = '-';
             ++s;
         }
 

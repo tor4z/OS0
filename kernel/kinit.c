@@ -1,7 +1,7 @@
-#include <kernel/const.h>
-#include <kernel/type.h>
-#include <kernel/kio.h>
-#include <kernel/protect.h>
+#include <sys/const.h>
+#include <sys/kio.h>
+#include <sys/protect.h>
+#include <type.h>
 #include "global.h"
 #include "int_handler.h"
 #include "kinit.h"

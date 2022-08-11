@@ -1,6 +1,6 @@
-#include <kernel/kio.h>
-#include <kernel/const.h>
-#include <kernel/type.h>
+#include <sys/kio.h>
+#include <sys/const.h>
+#include <type.h>
 #include <klib.h>
 #include "int_handler.h"
 
@@ -44,49 +44,49 @@ void phony_handler()
 
 void de_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_DE, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_DE, 0, eip, cs, eflags);
 }
 
 
 void db_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_DB, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_DB, 0, eip, cs, eflags);
 }
 
 
 void nmi_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_NMI, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_NMI, 0, eip, cs, eflags);
 }
 
 
 void bp_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_BP, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_BP, 0, eip, cs, eflags);
 }
 
 
 void of_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_OF, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_OF, 0, eip, cs, eflags);
 }
 
 
 void br_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_BR, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_BR, 0, eip, cs, eflags);
 }
 
 
 void ud_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_UD, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_UD, 0, eip, cs, eflags);
 }
 
 
 void nm_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_NM, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_NM, 0, eip, cs, eflags);
 }
 
 
@@ -98,7 +98,7 @@ void df_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 
 void cps_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_CPS, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_CPS, 0, eip, cs, eflags);
 }
 
 
@@ -134,13 +134,13 @@ void pf_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 
 void notused_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_NOTUSED, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_NOTUSED, 0, eip, cs, eflags);
 }
 
 
 void mf_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_MF, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_MF, 0, eip, cs, eflags);
 }
 
 
@@ -152,13 +152,13 @@ void ac_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
 
 void mc_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_MC, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_MC, 0, eip, cs, eflags);
 }
 
 
 void xf_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
-    exception_handler(INT_VEC_XF, -1, eip, cs, eflags);
+    exception_handler(INT_VEC_XF, 0, eip, cs, eflags);
 }
 
 
@@ -260,7 +260,7 @@ void irq15_handler()
 
 void syscall_handler()
 {
-
+    kprint("int 0x88");
 }
 
 
@@ -283,5 +283,13 @@ static void exception_handler(
     kprint(itoa(cs, buff, 16));
     kputchar('\n');
 
+    kprint("eflags: ");
+    kprint(itoa(eflags, buff, 16));
+    kputchar('\n');
+
     kputs(exp_msg[vec_no]);
+    
+    __asm__ __volatile__(
+        "hlt"
+    );
 }

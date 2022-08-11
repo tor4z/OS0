@@ -1,12 +1,12 @@
-#include <kernel/vga.h>
-#include <kernel/kio.h>
-#include <kernel/type.h>
+#include <sys/vga.h>
+#include <sys/kio.h>
+#include <type.h>
 
 
 int32_t kputchar(char c)
 {
     write_screen(c);
-    return (int)c;
+    return (int32_t)c;
 }
 
 

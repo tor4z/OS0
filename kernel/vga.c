@@ -1,10 +1,8 @@
-#include <kernel/vga.h>
+#include <sys/vga.h>
 
 
-static uint32_t scrn_z0 = 0x22222222;
 static uint32_t scrn_x = 0;
 static uint32_t scrn_y = 0;
-static uint32_t scrn_z1 = 0x11111111;
 
 static void scroll_line();
 static void write_newline();

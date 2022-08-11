@@ -1,7 +1,7 @@
 #ifndef PROTECT_H_
 #define PROTECT_H_
 
-#include <kernel/type.h>
+#include <type.h>
 
 /*
  * Present bit. Allows an entry to refer to a valid segment.

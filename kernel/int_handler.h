@@ -1,7 +1,8 @@
 #ifndef INT_HANDLER_H_
 #define INT_HANDLER_H_
 
-#include <kernel/type.h>
+#include <type.h>
+
 
 void phony_handler();
 

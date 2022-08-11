@@ -1,6 +1,6 @@
-#include <kernel/const.h>
-#include <kernel/protect.h>
-#include <kernel/type.h>
+#include <sys/const.h>
+#include <sys/protect.h>
+#include <type.h>
 #include "global.h"
 
 
