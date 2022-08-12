@@ -7,6 +7,15 @@
 #include "int_handler.h"
 
 
+#define GET_ARG0(arg)            \
+    __asm__ __volatile__(       \
+        "movl 4(%%ebp), %%eax"  \
+        : "=a"(arg)             \
+        :                       \
+        :                       \
+    )
+
+
 static void exception_handler(
     uint32_t vec_no, int32_t err_code,
     uint32_t eip, uint32_t cs, uint32_t eflags
@@ -44,122 +53,162 @@ void phony_handler()
 }
 
 
-void de_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void de_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_DE, 0, eip, cs, eflags);
 }
 
 
-void db_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void db_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_DB, 0, eip, cs, eflags);
 }
 
 
-void nmi_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void nmi_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_NMI, 0, eip, cs, eflags);
 }
 
 
-void bp_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void bp_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_BP, 0, eip, cs, eflags);
 }
 
 
-void of_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void of_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_OF, 0, eip, cs, eflags);
 }
 
 
-void br_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void br_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_BR, 0, eip, cs, eflags);
 }
 
 
-void ud_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void ud_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_UD, 0, eip, cs, eflags);
 }
 
 
-void nm_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void nm_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_NM, 0, eip, cs, eflags);
 }
 
 
-void df_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
+void df_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
+    uint32_t err_code;
+    GET_ARG0(err_code);
     exception_handler(INT_VEC_DF, err_code, eip, cs, eflags);
 }
 
 
-void cps_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void cps_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_CPS, 0, eip, cs, eflags);
 }
 
 
-void ts_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
+void ts_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
+    uint32_t err_code;
+    GET_ARG0(err_code);
     exception_handler(INT_VEC_TS, err_code, eip, cs, eflags);
 }
 
 
-void np_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
+void np_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
+    uint32_t err_code;
+    GET_ARG0(err_code);
     exception_handler(INT_VEC_NP, err_code, eip, cs, eflags);
 }
 
 
-void ss_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
+void ss_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
+    uint32_t err_code;
+    GET_ARG0(err_code);
     exception_handler(INT_VEC_SS, err_code, eip, cs, eflags);
 }
 
 
-void gp_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
+void gp_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
+    uint32_t err_code;
+    GET_ARG0(err_code);
     exception_handler(INT_VEC_GP, err_code, eip, cs, eflags);
 }
 
 
-void pf_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
+void pf_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
+    uint32_t err_code;
+    GET_ARG0(err_code);
     exception_handler(INT_VEC_PF, err_code, eip, cs, eflags);
 }
 
 
-void notused_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void notused_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_NOTUSED, 0, eip, cs, eflags);
 }
 
 
-void mf_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void mf_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_MF, 0, eip, cs, eflags);
 }
 
 
-void ac_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags)
+void ac_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
 {
+    uint32_t err_code;
+    GET_ARG0(err_code);
     exception_handler(INT_VEC_AC, err_code, eip, cs, eflags);
 }
 
 
-void mc_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void mc_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_MC, 0, eip, cs, eflags);
 }
 
 
-void xf_handler(uint32_t eip, uint32_t cs, uint32_t eflags)
+void xf_handler(uint32_t cs, uint32_t eflags)
 {
+    uint32_t eip;
+    GET_ARG0(eip);
     exception_handler(INT_VEC_XF, 0, eip, cs, eflags);
 }
 
@@ -263,7 +312,7 @@ void irq15_handler()
 void set_irq_handler(int id, irq_handler handler)
 {
     irq_tbl[id] = handler;
-    disable_int(id);
+    disable_irq(id);
 }
 
 
