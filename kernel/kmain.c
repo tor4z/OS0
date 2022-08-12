@@ -1,21 +1,17 @@
-#include <sys/kio.h>
 #include <sys/vga.h>
-#include "misc.h"
+#include <kio.h>
 #include <klib.h>
+#include "misc.h"
+#include "global.h"
+#include "restart.h"
 
 
 int kmain()
 {
     clean_screen();
     kputs("Hello world");
-    kputchar('X');
 
-    // __asm__ __volatile__(
-    //     "int $0x88"
-    // );
-    int i = 1, j = 0;
-    i = i / j;
-
-    pause();
+    restart();
+    // We will never reach here.
     return 0;
 }

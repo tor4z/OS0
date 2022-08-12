@@ -1,13 +1,17 @@
 #include <sys/const.h>
-#include <sys/kio.h>
 #include <sys/protect.h>
 #include <type.h>
+#include <kio.h>
 #include "global.h"
 #include "int_handler.h"
 #include "kinit.h"
 
 
 static void setup_8259a();
+static void setup_tss();
+static void setup_paging();
+static void setup_gdts();
+static void setup_idts();
 
 
 void kinit()
@@ -15,6 +19,7 @@ void kinit()
     setup_gdts();
     setup_gdtr();
     setup_idtr();
+    setup_tss();
 
     __asm__ __volatile__(
         "lgdt (%0)"
@@ -39,7 +44,17 @@ void kinit()
 
     setup_paging();
     setup_idts();
+
+    // init global variables
+    kreenter = 0;
 }
+
+
+static void setup_tss()
+{
+    init_tss(&tss, 4096, GDT_SELECTOR_CODE);
+}
+
 
 void setup_paging()
 {
@@ -85,22 +100,22 @@ void setup_gdts()
     );
     init_gdt(
         &gdts[GDT_CODE_IDX], 0, 0xfffff,
-        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S | GDT_ACCESS_BYTE_E |
-            GDT_ACCESS_BYTE_RW,
-        GDT_FLAGS_G | GDT_FLAGS_DB
+        GDT_PRES | GDT_NOTSYS | GDT_EXE |
+            GDT_RW,
+        GDT_PG | GDT_32BIT
     );
     init_gdt(
         &gdts[GDT_DATA_IDX], 0, 0xfffff,
-        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_S | GDT_ACCESS_BYTE_RW,
-        GDT_FLAGS_G | GDT_FLAGS_DB
+        GDT_PRES | GDT_NOTSYS | GDT_RW,
+        GDT_PG | GDT_32BIT
     );
     init_gdt(
         &gdts[GDT_TSS_IDX], (uint32_t)&tss, sizeof(struct tss),
-        GDT_ACCESS_BYTE_P | GDT_ACCESS_BYTE_E | GDT_ACCESS_BYTE_A,
-        GDT_FLAGS_G | GDT_FLAGS_DB
+        GDT_PRES | GDT_EXE | GDT_ACC,
+        GDT_PG | GDT_32BIT
     );
 
-    for (int i = GDT_LDT0_IDX; i < NUM_GDT; ++i)
+    for (int i = GDT_LDT_IDX(0); i < NUM_GDT; ++i)
     {
         init_gdt(&gdts[i], 0, 0, 0, 0);
     }

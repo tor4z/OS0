@@ -1,6 +1,6 @@
 #include <sys/vga.h>
-#include <sys/kio.h>
 #include <type.h>
+#include <kio.h>
 
 
 int32_t kputchar(char c)

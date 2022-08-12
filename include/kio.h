@@ -10,6 +10,7 @@
 int32_t kputchar(char c);
 int32_t kputs(const char *str);
 int32_t kprint(const char *str);
+int32_t kprintf(const char *fmt, ...);
 
 // IO manipulation
 void out_byte(uint16_t port, uint8_t data);

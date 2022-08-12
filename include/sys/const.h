@@ -1,6 +1,9 @@
 #ifndef CONST_H_
 #define CONST_H_
 
+#define KER_STACK_SIZE 4096
+#define TASK_STACK_SIZE 4096
+
 #define NUM_GDT 128
 #define NUM_IDT 256
 

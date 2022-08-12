@@ -144,7 +144,6 @@ protect_mod:
     movw %ax, %fs
     movw %ax, %gs
     movw %ax, %es
-    movw $GDT_SELECTOR_STACK, %ax
     movw %ax, %ss
     movl $global_stack_section_len, %esp    /* stack top */
 

@@ -50,3 +50,26 @@ void *memset(void *ptr, int x, size_t n)
 
     return ptr;
 }
+
+
+char* strcpy(char* dest, const char* src)
+{
+    while (*src)
+    {
+        *dest = *src;
+        ++src;
+        ++dest;
+    }
+    *dest = '\0';
+    return dest;
+}
+
+
+size_t strlen(const char *str)
+{
+    size_t len = 0;
+    while (*str)
+        ++len;
+    return len;
+}
+

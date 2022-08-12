@@ -7,28 +7,29 @@
  * Present bit. Allows an entry to refer to a valid segment.
  * Must be set (1) for any valid segment.
  */
-#define GDT_ACCESS_BYTE_P   0x80
+#define GDT_PRES   0x80
 /*
  * Descriptor privilege level field. Contains the CPU Privilege
  * level of the segment. 0 = highest privilege (kernel),
  * 3 = lowest privilege (user applications).
  */
-#define GDT_ACCESS_BYTE_DPL0 0x00
-#define GDT_ACCESS_BYTE_DPL1 0x20
-#define GDT_ACCESS_BYTE_DPL2 0x40
-#define GDT_ACCESS_BYTE_DPL3 0x60
+#define GDT_DPL_MASK 0x60
+#define GDT_DPL0 0x00
+#define GDT_DPL1 0x20
+#define GDT_DPL2 0x40
+#define GDT_DPL3 0x60
 /*
  * Descriptor type bit. If clear (0) the descriptor defines
  * a system segment (eg. a Task State Segment). If set (1)
  * it defines a code or data segment.
  */
-#define GDT_ACCESS_BYTE_S   0x10
+#define GDT_NOTSYS   0x10
 /*
  * Executable bit. If clear (0) the descriptor defines a data
  * segment. If set (1) it defines a code segment which can be
  * executed from.
  */
-#define GDT_ACCESS_BYTE_E   0x08
+#define GDT_EXE   0x08
 /*
  * Direction bit/Conforming bit.
  *  - For data selectors: Direction bit. If clear (0) the segment
@@ -48,7 +49,7 @@
  *      3 to a segment with a DPL of 2 remains in ring 3 after the
  *      jump.
  */
-#define GDT_ACCESS_BYTE_DC  0x04
+#define GDT_DC  0x04
 /*
  * Readable bit/Writable bit.
  *  - For code segments: Readable bit. If clear (0), read access for
@@ -58,40 +59,40 @@
  *    this segment is not allowed. If set (1) write access is allowed.
  *    Read access is always allowed for data segments.
  */
-#define GDT_ACCESS_BYTE_RW  0x02
+#define GDT_RW  0x02
 /*
  * Accessed bit. Best left clear (0), the CPU will set it when the
  * segment is accessed.
  */
-#define GDT_ACCESS_BYTE_A   0x01
+#define GDT_ACC   0x01
 
 /*
  * Granularity flag, indicates the size the Limit value is scaled by.
  * If clear (0), the Limit is in 1 Byte blocks (byte granularity).
  * If set (1), the Limit is in 4 KiB blocks (page granularity).
  */
-#define GDT_FLAGS_G         0x80
+#define GDT_PG         0x80
 /*
  * Size flag. If clear (0), the descriptor defines a 16-bit protected
  * mode segment. If set (1) it defines a 32-bit protected mode segment.
  * A GDT can have both 16-bit and 32-bit selectors at once.
  */
-#define GDT_FLAGS_DB        0x40
+#define GDT_32BIT        0x40
 /*
  * Long-mode code flag. If set (1), the descriptor defines a 64-bit code
  * segment. When set, DB should always be clear. For any other type of
  * segment (other code types or any data segment), it should be clear (0).
  */
-#define GDT_FLAGS_L         0x20
-#define GDT_FLAGS_RESERVED  0x10
+#define GDT_LONG         0x20
+// #define GDT_FLAGS_RESERVED  0x10
 
 
-#define SELECTOR_ATTR_GDT     0x0
-#define SELECTOR_ATTR_LDT     0x4
-#define SELECTOR_ATTR_PL0     0x0
-#define SELECTOR_ATTR_PL1     0x1
-#define SELECTOR_ATTR_PL2     0x2
-#define SELECTOR_ATTR_PL3     0x3
+#define SELECTOR_GDT     0x0
+#define SELECTOR_LDT     0x4
+#define SELECTOR_RPL0     0x0
+#define SELECTOR_RPL1     0x1
+#define SELECTOR_RPL2     0x2
+#define SELECTOR_RPL3     0x3
 
 
 #define CALL_GATE_16    0x4
@@ -111,7 +112,7 @@
 #define GDT_CODE_IDX       1
 #define GDT_DATA_IDX       2
 #define GDT_TSS_IDX        3
-#define GDT_LDT0_IDX       4
+#define GDT_LDT_IDX(n)     ((n) + 4)
 
 #define GDT_SELECTOR_NULL       (GDT_NULL_IDX << 3)
 #define GDT_SELECTOR_CODE       (GDT_CODE_IDX << 3)
@@ -130,6 +131,35 @@
 #define INT_GATE_PL2        0x40
 #define INT_GATE_PL3        0x60
 #define INT_GATE_P          0x80
+
+
+#define TSS_OFF_BL      0
+#define TSS_OFF_ESP0    TSS_OFF_BL + 4
+#define TSS_OFF_SS0     TSS_OFF_ESP0 + 4
+#define TSS_OFF_ESP1    TSS_OFF_SS0 + 4
+#define TSS_OFF_SS1     TSS_OFF_ESP1 + 4
+#define TSS_OFF_ESP2    TSS_OFF_SS1 + 4
+#define TSS_OFF_SS2     TSS_OFF_ESP2 + 4
+#define TSS_OFF_CR3     TSS_OFF_SS2 + 4
+#define TSS_OFF_EIP     TSS_OFF_CR3 + 4
+#define TSS_OFF_EFLAGS  TSS_OFF_EIP + 4
+#define TSS_OFF_EAX     TSS_OFF_EFLAGS + 4
+#define TSS_OFF_ECX     TSS_OFF_EAX + 4
+#define TSS_OFF_EDX     TSS_OFF_ECX + 4
+#define TSS_OFF_EBX     TSS_OFF_EDX + 4
+#define TSS_OFF_EBP     TSS_OFF_EBX + 4
+#define TSS_OFF_ESI     TSS_OFF_EBP + 4
+#define TSS_OFF_EDI     TSS_OFF_ESI + 4
+#define TSS_OFF_ES      TSS_OFF_EDI + 4
+#define TSS_OFF_CS      TSS_OFF_ES + 4
+#define TSS_OFF_SS      TSS_OFF_CS + 4
+#define TSS_OFF_DS      TSS_OFF_SS + 4
+#define TSS_OFF_FS      TSS_OFF_DS + 4
+#define TSS_OFF_GS      TSS_OFF_FS + 4
+#define TSS_OFF_LDTR    TSS_OFF_GS + 4
+#define TSS_OFF_TRAP    TSS_OFF_LDTR + 4
+#define TSS_OFF_IOBASE  TSS_OFF_TRAP + 2
+
 
 
 struct gdt
