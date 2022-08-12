@@ -1,18 +1,20 @@
 #include <sys/const.h>
 #include <sys/protect.h>
+#include <sys/proc.h>
+#include <sys/task.h>
 #include <type.h>
 #include <kio.h>
 #include "global.h"
 #include "int_handler.h"
 #include "kinit.h"
-#include "sys/task.h"
+#include "8259a.h"
 
 
-static void setup_8259a();
 static void setup_tss();
 static void setup_paging();
 static void setup_gdts();
 static void setup_idts();
+static void setup_irq_tbl();
 
 
 void kinit()
@@ -21,6 +23,7 @@ void kinit()
     setup_gdtr();
     setup_idtr();
     setup_tss();
+    setup_irq_tbl();
 
     __asm__ __volatile__(
         "lgdt (%0)"
@@ -48,6 +51,15 @@ void kinit()
 
     // init global variables
     kreenter = 0;
+}
+
+
+static void setup_irq_tbl()
+{
+    for (int i = 0; i< NUM_IRQ; ++i)
+    {
+        irq_tbl[i] = phony_handler;
+    }
 }
 
 
@@ -116,7 +128,7 @@ void setup_gdts()
         GDT_PG | GDT_32BIT
     );
 
-    for (int i = 0; i < (N_TASK + N_UTASK); ++i)
+    for (int i = 0; i < (NUM_PROC); ++i)
     {
         init_gdt(
             &gdts[GDT_LDT_IDX(i)], (uint32_t)proc_tbl[i].ldts,
@@ -222,67 +234,67 @@ void setup_idts()
     );
 
     init_idt(
-        &idts[INT_VEC_IRQ0], (uint32_t)irq0_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(0)], (uint32_t)irq0_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ1], (uint32_t)irq1_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(1)], (uint32_t)irq1_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ2], (uint32_t)irq2_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(2)], (uint32_t)irq2_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ3], (uint32_t)irq3_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(3)], (uint32_t)irq3_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ4], (uint32_t)irq4_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(4)], (uint32_t)irq4_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ5], (uint32_t)irq5_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(5)], (uint32_t)irq5_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ6], (uint32_t)irq6_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(6)], (uint32_t)irq6_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ7], (uint32_t)irq7_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(7)], (uint32_t)irq7_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ8], (uint32_t)irq8_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(8)], (uint32_t)irq8_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ9], (uint32_t)irq9_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(9)], (uint32_t)irq9_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ10], (uint32_t)irq10_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(10)], (uint32_t)irq10_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ11], (uint32_t)irq11_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(11)], (uint32_t)irq11_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ12], (uint32_t)irq12_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(12)], (uint32_t)irq12_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ13], (uint32_t)irq13_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(13)], (uint32_t)irq13_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ14], (uint32_t)irq14_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(14)], (uint32_t)irq14_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
     init_idt(
-        &idts[INT_VEC_IRQ15], (uint32_t)irq15_handler, GDT_SELECTOR_CODE,
+        &idts[INT_VEC_IRQ(15)], (uint32_t)irq15_handler, GDT_SELECTOR_CODE,
         INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
     );
 
@@ -293,34 +305,7 @@ void setup_idts()
 }
 
 
-static void setup_8259a()
+static void setup_pic()
 {
-    // ICW1
-    // ICW4 needed
-    // D4 = 1
-    out_byte(MASTER_8259A_P0, 0x11);
-    out_byte(SLAVE_8259A_P0, 0x11);
-
-    // ICW2
-    // master: vector addres 0x20
-    // slave: vector addres 0x28
-    out_byte(MASTER_8259A_P1, IRQ_MASTER_VEC);
-    out_byte(SLAVE_8259A_P1, IRQ_SLAVE_VEC);
-
-    // ICW3
-    // master: D2 has slave
-    // slave: set slave ID to 2
-    out_byte(MASTER_8259A_P1, 0x04);
-    out_byte(SLAVE_8259A_P1, 0x02);
-
-    // ICW4
-    // set 8086/8088 mode
-    // normal EOI
-    // no buffer mode
-    out_byte(MASTER_8259A_P1, 0x01);
-    out_byte(SLAVE_8259A_P1, 0x01);
-
-    // OCW1
-    out_byte(MASTER_8259A_P1, 0xff);
-    out_byte(SLAVE_8259A_P1, 0xff);
+    setup_8259a();
 }

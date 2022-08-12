@@ -3,16 +3,18 @@
 
 #include <sys/const.h>
 #include <sys/protect.h>
+#include <sys/task.h>
 #include <type.h>
 
 
-#define NAME_SIZE 32
+#define NAME_SIZE   32
+#define NUM_PROC      (NUM_TASK + NUM_UTASK)
 
-#define LDT_CODE_IDX 0
-#define LDT_DATA_IDX 1
-#define LDT_SELECTOR_CODE (LDT_CODE_IDX << 3)
-#define LDT_SELECTOR_DATA (LDT_DATA_IDX << 3)
 
+#define LDT_CODE_IDX        0
+#define LDT_DATA_IDX        1
+#define LDT_SELECTOR_CODE   (LDT_CODE_IDX << 3)
+#define LDT_SELECTOR_DATA   (LDT_DATA_IDX << 3)
 
 
 struct frame

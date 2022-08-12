@@ -14,10 +14,7 @@
 #define NUM_PDE 1024
 #define NUM_PTE (1024 * NUM_PDE)
 
-#define MASTER_8259A_P0 0x20
-#define SLAVE_8259A_P0  0xa0
-#define MASTER_8259A_P1 0x21
-#define SLAVE_8259A_P1  0xa1
+#define NUM_IRQ 16
 
 #define IRQ_MASTER_VEC  0x20
 #define IRQ_SLAVE_VEC   0x28
@@ -44,24 +41,12 @@
 #define INT_VEC_MC      0x12    /* Abort        N     Machine check (Since Pentium) */
 #define INT_VEC_XF      0x13    /* Fault        N     SSE / SSE2 (Since Pentium III) */
 // IRQ
-#define INT_VEC_IRQ0    0x20
-#define INT_VEC_IRQ1    0x21
-#define INT_VEC_IRQ2    0x22
-#define INT_VEC_IRQ3    0x23
-#define INT_VEC_IRQ4    0x24
-#define INT_VEC_IRQ5    0x25
-#define INT_VEC_IRQ6    0x26
-#define INT_VEC_IRQ7    0x27
-#define INT_VEC_IRQ8    0x28
-#define INT_VEC_IRQ9    0x29
-#define INT_VEC_IRQ10   0x2a
-#define INT_VEC_IRQ11   0x2b
-#define INT_VEC_IRQ12   0x2c
-#define INT_VEC_IRQ13   0x2d
-#define INT_VEC_IRQ14   0x2e
-#define INT_VEC_IRQ15   0x2f
+#define INT_VEC_IRQ(n)  ((n) + 0x20)
 // sys
 #define INT_VEC_SYSCALL 0x88
+
+
+#define IRQ_CLOCK       0
 
 
 #define PROC_OFF_GS             0

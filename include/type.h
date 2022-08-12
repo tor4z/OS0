@@ -12,5 +12,6 @@ typedef unsigned char uint8_t;
 
 typedef unsigned long size_t;
 
+typedef void (*irq_handler)();
 
 #endif // TYPE_H_

@@ -94,7 +94,7 @@ char *itoa (int value, char *str, int base)
 
         if (value == 0)
         {
-            *s = 0;
+            *s = '0';
             ++s;
         }
 

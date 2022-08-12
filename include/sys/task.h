@@ -19,8 +19,8 @@
 #define RPL2 SELECTOR_RPL2
 #define RPL3 SELECTOR_RPL3
 
-#define N_TASK 1        // number of system task
-#define N_UTASK 2       // number of user task
+#define NUM_TASK 1        // number of system task
+#define NUM_UTASK 2       // number of user task
 
 // bit 2 is always 1
 #define TASK_EFLAGS  0x1202       // IF = 1, IOPL = 1

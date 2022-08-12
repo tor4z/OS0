@@ -16,7 +16,7 @@ void setup_proc_tbl()
 {
     uint32_t stacktop = (uint32_t)task_stackbase + TASK_STACK_SIZE;
 
-    for (int i = 0; i < N_TASK; ++i)
+    for (int i = 0; i < NUM_TASK; ++i)
     {
         proc_tbl[i].regs.cs = LDT_SELECTOR_CODE | SELECTOR_LDT | tasks[i].rpl;
         proc_tbl[i].regs.ds = LDT_SELECTOR_DATA | SELECTOR_LDT | tasks[i].rpl;
@@ -51,7 +51,7 @@ void setup_proc_tbl()
         stacktop -= tasks[i].stack_size;
     }
 
-    for (int i = N_TASK; i < N_UTASK + N_TASK; ++i)
+    for (int i = NUM_TASK; i < NUM_UTASK + NUM_TASK; ++i)
     {
         proc_tbl[i].regs.cs = LDT_SELECTOR_CODE | SELECTOR_LDT | tasks[i].rpl;
         proc_tbl[i].regs.ds = LDT_SELECTOR_DATA | SELECTOR_LDT | tasks[i].rpl;
@@ -90,5 +90,24 @@ void setup_proc_tbl()
 
 void schedule()
 {
-    
+    int greatest = 0;
+    while (!greatest)
+    {
+        for (int i = 0; i < NUM_PROC; ++i)
+        {
+            if(greatest < proc_tbl[i].ticks)
+            {
+                greatest = proc_tbl[i].ticks;
+                curr_proc = &proc_tbl[i];
+            }
+        }
+
+        if (!greatest)
+        {
+            for (int i = 0; i < NUM_PROC; ++i)
+            {
+                proc_tbl[i].ticks = proc_tbl[i].priority;
+            }
+        }
+    }
 }

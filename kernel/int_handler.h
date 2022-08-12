@@ -1,6 +1,7 @@
 #ifndef INT_HANDLER_H_
 #define INT_HANDLER_H_
 
+#include "sys/const.h"
 #include <type.h>
 
 
@@ -27,6 +28,7 @@ void ac_handler(uint32_t err_code, uint32_t eip, uint32_t cs, uint32_t eflags);
 void mc_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
 void xf_handler(uint32_t eip, uint32_t cs, uint32_t eflags);
 
+
 void irq0_handler();
 void irq1_handler();
 void irq2_handler();
@@ -43,6 +45,8 @@ void irq12_handler();
 void irq13_handler();
 void irq14_handler();
 void irq15_handler();
+
+void set_irq_handler(int id, irq_handler handler);
 
 void syscall_handler();
 

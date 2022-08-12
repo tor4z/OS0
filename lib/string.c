@@ -1,7 +1,7 @@
 #include <string.h>
 
 
-void *memcpy(void *dest, const void * src, size_t n)
+void *memcpy(void *dest, const void *src, size_t n)
 {
     __asm__ __volatile__(
         "cld\n\t"
@@ -54,6 +54,7 @@ void *memset(void *ptr, int x, size_t n)
 
 char* strcpy(char* dest, const char* src)
 {
+    char *ret = dest;
     while (*src)
     {
         *dest = *src;
@@ -61,7 +62,7 @@ char* strcpy(char* dest, const char* src)
         ++dest;
     }
     *dest = '\0';
-    return dest;
+    return ret;
 }
 
 
@@ -69,7 +70,10 @@ size_t strlen(const char *str)
 {
     size_t len = 0;
     while (*str)
+    {
         ++len;
+        ++str;
+    }
     return len;
 }
 

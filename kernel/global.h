@@ -25,14 +25,14 @@ EXTERN struct idtr idt_ptr;
 EXTERN int32_t kreenter;
 
 
-EXTERN struct task tasks[N_TASK];
-EXTERN struct task user_tasks[N_UTASK];
-EXTERN struct proc proc_tbl[N_TASK + N_UTASK];
+EXTERN struct task tasks[NUM_TASK];
+EXTERN struct task user_tasks[NUM_UTASK];
+EXTERN struct proc proc_tbl[NUM_PROC];
 EXTERN struct proc *curr_proc;
 
 
 EXTERN char task_stackbase[TASK_STACK_SIZE];
-
+EXTERN irq_handler irq_tbl[NUM_IRQ];
 
 
 #undef EXTERN
