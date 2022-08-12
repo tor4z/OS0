@@ -5,9 +5,10 @@
 #include "8259a.h"
 #include "global.h"
 #include "int_handler.h"
+#include "restart.h"
 
 
-#define GET_ARG0(arg)            \
+#define GET_ARG0(arg)           \
     __asm__ __volatile__(       \
         "movl 4(%%ebp), %%eax"  \
         : "=a"(arg)             \
@@ -213,98 +214,114 @@ void xf_handler(uint32_t cs, uint32_t eflags)
 }
 
 
-void irq0_handler()
-{
-    master_int(0);
-}
+// void irq0_handler()
+// {
+//     save();
+//     master_int(0);
+// }
 
 
 void irq1_handler()
 {
+    save();
     master_int(1);
 }
 
 
 void irq2_handler()
 {
+    save();
     master_int(2);
 }
 
 
 void irq3_handler()
 {
+    save();
     master_int(3);
 }
 
 
 void irq4_handler()
 {
+    save();
     master_int(4);
 }
 
 
 void irq5_handler()
 {
+    save();
     master_int(5);
 }
 
 
 void irq6_handler()
 {
+    save();
     master_int(6);
 }
 
 
 void irq7_handler()
 {
+    save();
     master_int(7);
 }
 
 
 void irq8_handler()
 {
+    save();
     slave_int(8);
 }
 
 
 void irq9_handler()
 {
+    save();
     slave_int(9);
 }
 
 
 void irq10_handler()
 {
+    save();
     slave_int(10);
 }
 
 
 void irq11_handler()
 {
+    save();
     slave_int(11);
 }
 
 
 void irq12_handler()
 {
+    save();
     slave_int(12);
 }
 
 
 void irq13_handler()
 {
+    save();
     slave_int(13);
 }
 
 
 void irq14_handler()
 {
+    save();
     slave_int(14);
 }
 
 
 void irq15_handler()
 {
+    save();
     slave_int(15);
 }
 

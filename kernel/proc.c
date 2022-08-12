@@ -41,8 +41,8 @@ void setup_proc_tbl()
             sizeof(struct gdt)
         );
         UPDATE_LDT_ACCB(proc_tbl[i].ldts[1], GDT_DPL_MASK, tasks[i].dpl);
-        proc_tbl[i].ticks = 0;
         proc_tbl[i].priority = 5;
+        proc_tbl[i].ticks = proc_tbl[i].priority;
         proc_tbl[i].pid = i;
         proc_tbl[i].tty = 0; // not used yet
         proc_tbl[i].ldt_selector = GDT_SELECTOR_LDT(i);
@@ -76,8 +76,8 @@ void setup_proc_tbl()
             sizeof(struct gdt)
         );
         UPDATE_LDT_ACCB(proc_tbl[i].ldts[1], GDT_DPL_MASK, tasks[i].dpl);
-        proc_tbl[i].ticks = 0;
         proc_tbl[i].priority = 5;
+        proc_tbl[i].ticks = proc_tbl[i].priority;
         proc_tbl[i].pid = i;
         proc_tbl[i].tty = 0; // not used yet
         proc_tbl[i].ldt_selector = GDT_LDT_IDX(i);

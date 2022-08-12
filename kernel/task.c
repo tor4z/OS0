@@ -1,6 +1,7 @@
 #include <sys/task.h>
 #include <kio.h>
 #include <string.h>
+#include <klib.h>
 #include "global.h"
 
 
@@ -14,8 +15,8 @@ void setup_tasks()
     strcpy(tasks[0].name, "taskA");
     tasks[0].ptr = (uint32_t)task_a;
     tasks[0].stack_size = STACK_SIZE;
-    tasks[0].dpl = DPL0;
-    tasks[0].rpl = RPL0;
+    tasks[0].dpl = DPL1;
+    tasks[0].rpl = RPL1;
 }
 
 
@@ -35,11 +36,23 @@ void setup_utasks()
 }
 
 
+static void dummy_sleep()
+{
+    int n = 99999999;
+    while (n)
+        --n;
+}
+
+
 static void task_a()
 {
+    char buff[16];
     while (1)
     {
+        kprint("kreenter: ");
+        kputs(itoa(kreenter, buff, 10));
         kputs("task a, sys task");
+        dummy_sleep();
     }
 }
 
@@ -49,6 +62,7 @@ static void task_b()
     while(1)
     {
         kputs("task b, a user task");
+        dummy_sleep();
     }
 }
 
@@ -58,5 +72,6 @@ static void task_c()
     while (1)
     {
         kputs("task c, a user task");
+        dummy_sleep();
     }
 }

@@ -5,11 +5,12 @@
 #include "global.h"
 
 
-#define MASTER_CMD    0x20
-#define SLAVE_CMD     0xa0
-#define MASTER_DATA   0x21
-#define SLAVE_DATA    0xa1
-#define EOI           0x20
+#define MASTER_CMD      0x20
+#define SLAVE_CMD       0xa0
+#define MASTER_DATA     0x21
+#define SLAVE_DATA      0xa1
+#define EOI             0x20
+#define MASTER_IRQ_LIM  7
 
 
 void setup_8259a()
@@ -47,45 +48,62 @@ void setup_8259a()
 
 void master_int(int id)
 {
-    save();
     // mask this type interrupt
-    out_byte(MASTER_DATA, 1<<id);
+    disable_irq(id);
     // set end of intterrupt
     out_byte(MASTER_CMD, EOI);
 
-    __asm__ __volatile__("sti");
+    ENABLE_INT();
     irq_tbl[id]();
-    __asm__ __volatile__("cli");
+    DISABLE_INT();
 
     // unmask this type interrupt
-    out_byte(MASTER_DATA, ~(1<<id));
+    enable_irq(id);
 }
 
 
 void slave_int(int id)
 {
-    save();
     // mask this type interrupt
-    out_byte(SLAVE_DATA, 1<<id);
+    disable_irq(id);
     // set end of intterrupt
+    out_byte(MASTER_CMD, EOI);
     out_byte(SLAVE_CMD, EOI);
 
-    __asm__ __volatile__("sti");
+    ENABLE_INT();
     irq_tbl[id]();
-    __asm__ __volatile__("cli");
+    DISABLE_INT();
 
     // unmask this type interrupt
-    out_byte(SLAVE_DATA, ~(1<<id));
+    enable_irq(id);
 }
 
 
-void disable_int(int id)
+void disable_irq(int id)
 {
+    int port;
+    if(id > MASTER_IRQ_LIM)
+        port = SLAVE_DATA;
+    else
+        port = MASTER_DATA;
 
+    uint8_t mask = (1 << id);
+    uint8_t data = in_byte(port);
+    data |= mask;
+    out_byte(port, data);
 }
 
 
-void enable_int(int id)
+void enable_irq(int id)
 {
+    int port;
+    if(id > MASTER_IRQ_LIM)
+        port = SLAVE_DATA;
+    else
+        port = MASTER_DATA;
 
+    uint8_t mask = ~(1 << id);
+    uint8_t data = in_byte(port);
+    data &= mask;
+    out_byte(port, data);
 }

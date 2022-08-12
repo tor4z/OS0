@@ -2,6 +2,9 @@
 
     .extern curr_proc
     .extern ker_stackbase
+    .extern inc_kreenter
+    .extern dec_kreenter
+    .extern master_int
 
     .section .text
     .global restart
@@ -11,9 +14,11 @@
 restart:
     movl curr_proc, %esp
     lldt PROC_OFF_LDT_SELECTOR(%esp)
-    leal PROC_OFF_SS(%esp), %eax
+    // leal PROC_OFF_SS(%esp), %eax
     movl $tss, %esi
-    movl %eax, TSS_OFF_ESP0(%esi)
+    movl %ss, %eax
+    movl %eax, TSS_OFF_SS0(%esi)
+    movl %esp, TSS_OFF_ESP0(%esi)
 restart_enter:
     decl kreenter
     popl %gs
@@ -37,13 +42,22 @@ save:
     cmpl $0, kreenter
     je in_kernel
 
-    movl PROC_OFF_RET(%esp), %esi
+    movl %esp, %esi
 not_kernel:
     movl $ker_stackbase, %esp   // kernel stack top
-    pushl restart
+    pushl $restart
     jmp save_ret
 in_kernel:
-    pushl restart_enter
+    pushl $restart_enter
 save_ret:
-    pushl %esi                  // restore the caller's address
+    jmp PROC_OFF_RET(%esi)
+
+
+    .global irq0_handler
+    .type irq0_handler, @function
+irq0_handler:
+    call save
+    pushl $0
+    call master_int
+    addl $4, %esp
     ret
