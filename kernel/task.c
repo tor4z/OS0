@@ -37,17 +37,26 @@ void setup_utasks()
 
 static void task_a()
 {
-    kputs("task a, sys task");
+    while (1)
+    {
+        kputs("task a, sys task");
+    }
 }
 
 
 static void task_b()
 {
-    kputs("task b, a user task");
+    while(1)
+    {
+        kputs("task b, a user task");
+    }
 }
 
 
 static void task_c()
 {
-    kputs("task c, a user task");
+    while (1)
+    {
+        kputs("task c, a user task");
+    }
 }

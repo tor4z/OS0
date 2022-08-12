@@ -28,12 +28,11 @@ EXTERN int32_t kreenter;
 EXTERN struct task tasks[N_TASK];
 EXTERN struct task user_tasks[N_UTASK];
 EXTERN struct proc proc_tbl[N_TASK + N_UTASK];
+EXTERN struct proc *curr_proc;
 
 
 EXTERN char task_stackbase[TASK_STACK_SIZE];
 
-
-extern struct proc *curr_proc;
 
 
 #undef EXTERN

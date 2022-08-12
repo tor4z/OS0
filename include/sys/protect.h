@@ -104,10 +104,6 @@
 #define CALL_GATE_P     0x1
 #define CALL_GATE_NP    0x0
 
-#define GDT_SIZE    8
-#define IDT_SIZE    8
-#define LDT_SIZE    GDT_SIZE
-
 #define GDT_NULL_IDX       0
 #define GDT_CODE_IDX       1
 #define GDT_DATA_IDX       2
@@ -118,7 +114,7 @@
 #define GDT_SELECTOR_CODE       (GDT_CODE_IDX << 3)
 #define GDT_SELECTOR_DATA       (GDT_DATA_IDX << 3)
 #define GDT_SELECTOR_TSS        (GDT_TSS_IDX << 3)
-#define GDT_SELECTOR_LDT(n)     ((GDT_LDT0_IDX + (n)) << 3)
+#define GDT_SELECTOR_LDT(n)     (GDT_LDT_IDX(n) << 3)
 
 
 #define INT_GATE_TASK       0x05
@@ -131,34 +127,6 @@
 #define INT_GATE_PL2        0x40
 #define INT_GATE_PL3        0x60
 #define INT_GATE_P          0x80
-
-
-#define TSS_OFF_BL      0
-#define TSS_OFF_ESP0    TSS_OFF_BL + 4
-#define TSS_OFF_SS0     TSS_OFF_ESP0 + 4
-#define TSS_OFF_ESP1    TSS_OFF_SS0 + 4
-#define TSS_OFF_SS1     TSS_OFF_ESP1 + 4
-#define TSS_OFF_ESP2    TSS_OFF_SS1 + 4
-#define TSS_OFF_SS2     TSS_OFF_ESP2 + 4
-#define TSS_OFF_CR3     TSS_OFF_SS2 + 4
-#define TSS_OFF_EIP     TSS_OFF_CR3 + 4
-#define TSS_OFF_EFLAGS  TSS_OFF_EIP + 4
-#define TSS_OFF_EAX     TSS_OFF_EFLAGS + 4
-#define TSS_OFF_ECX     TSS_OFF_EAX + 4
-#define TSS_OFF_EDX     TSS_OFF_ECX + 4
-#define TSS_OFF_EBX     TSS_OFF_EDX + 4
-#define TSS_OFF_EBP     TSS_OFF_EBX + 4
-#define TSS_OFF_ESI     TSS_OFF_EBP + 4
-#define TSS_OFF_EDI     TSS_OFF_ESI + 4
-#define TSS_OFF_ES      TSS_OFF_EDI + 4
-#define TSS_OFF_CS      TSS_OFF_ES + 4
-#define TSS_OFF_SS      TSS_OFF_CS + 4
-#define TSS_OFF_DS      TSS_OFF_SS + 4
-#define TSS_OFF_FS      TSS_OFF_DS + 4
-#define TSS_OFF_GS      TSS_OFF_FS + 4
-#define TSS_OFF_LDTR    TSS_OFF_GS + 4
-#define TSS_OFF_TRAP    TSS_OFF_LDTR + 4
-#define TSS_OFF_IOBASE  TSS_OFF_TRAP + 2
 
 
 

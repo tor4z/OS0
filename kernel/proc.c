@@ -45,7 +45,7 @@ void setup_proc_tbl()
         proc_tbl[i].priority = 5;
         proc_tbl[i].pid = i;
         proc_tbl[i].tty = 0; // not used yet
-        proc_tbl[i].ldt_selector = GDT_LDT_IDX(i);
+        proc_tbl[i].ldt_selector = GDT_SELECTOR_LDT(i);
         strcpy(proc_tbl[i].name, tasks[i].name);
 
         stacktop -= tasks[i].stack_size;

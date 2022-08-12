@@ -6,6 +6,10 @@
 
 #define NUM_GDT 128
 #define NUM_IDT 256
+#define NUM_LDT 2
+#define GDT_SIZE 8
+#define LDT_SIZE GDT_SIZE
+#define IDT_SIZE GDT_SIZE
 
 #define NUM_PDE 1024
 #define NUM_PTE (1024 * NUM_PDE)
@@ -58,5 +62,60 @@
 #define INT_VEC_IRQ15   0x2f
 // sys
 #define INT_VEC_SYSCALL 0x88
+
+
+#define PROC_OFF_GS             0
+#define PROC_OFF_FS             (PROC_OFF_GS + 4)
+#define PROC_OFF_ES             (PROC_OFF_FS + 4)
+#define PROC_OFF_DS             (PROC_OFF_ES + 4)
+#define PROC_OFF_EDI            (PROC_OFF_DS + 4)
+#define PROC_OFF_ESI            (PROC_OFF_EDI + 4)
+#define PROC_OFF_EBP            (PROC_OFF_ESI + 4)
+#define PROC_OFF_KESP           (PROC_OFF_EBP + 4)
+#define PROC_OFF_EBX            (PROC_OFF_KESP + 4)
+#define PROC_OFF_EDX            (PROC_OFF_EBX + 4)
+#define PROC_OFF_ECX            (PROC_OFF_EDX + 4)
+#define PROC_OFF_EAX            (PROC_OFF_ECX + 4)
+#define PROC_OFF_RET            (PROC_OFF_EAX + 4)
+#define PROC_OFF_EIP            (PROC_OFF_RET + 4)
+#define PROC_OFF_CS             (PROC_OFF_EIP + 4)
+#define PROC_OFF_EFLAGS         (PROC_OFF_CS + 4)
+#define PROC_OFF_ESP            (PROC_OFF_EFLAGS + 4)
+#define PROC_OFF_SS             (PROC_OFF_ESP + 4)
+#define PROC_OFF_LDT            (PROC_OFF_SS + 4)
+#define PROC_OFF_TICKS          (PROC_OFF_LDT + (NUM_LDT * LDT_SIZE))
+#define PROC_OFF_PRIORITY       (PROC_OFF_TICKS + 4)
+#define PROC_OFF_PID            (PROC_OFF_PRIORITY + 4)
+#define PROC_OFF_TTY            (PROC_OFF_PID + 4)
+#define PROC_OFF_LDT_SELECTOR   (PROC_OFF_TTY + 4)
+#define PROC_OFF_NAME           (PROC_OFF_LDT_SELECTOR + 2)
+
+
+#define TSS_OFF_BL      0
+#define TSS_OFF_ESP0    (TSS_OFF_BL + 4)
+#define TSS_OFF_SS0     (TSS_OFF_ESP0 + 4)
+#define TSS_OFF_ESP1    (TSS_OFF_SS0 + 4)
+#define TSS_OFF_SS1     (TSS_OFF_ESP1 + 4)
+#define TSS_OFF_ESP2    (TSS_OFF_SS1 + 4)
+#define TSS_OFF_SS2     (TSS_OFF_ESP2 + 4)
+#define TSS_OFF_CR3     (TSS_OFF_SS2 + 4)
+#define TSS_OFF_EIP     (TSS_OFF_CR3 + 4)
+#define TSS_OFF_EFLAGS  (TSS_OFF_EIP + 4)
+#define TSS_OFF_EAX     (TSS_OFF_EFLAGS + 4)
+#define TSS_OFF_ECX     (TSS_OFF_EAX + 4)
+#define TSS_OFF_EDX     (TSS_OFF_ECX + 4)
+#define TSS_OFF_EBX     (TSS_OFF_EDX + 4)
+#define TSS_OFF_EBP     (TSS_OFF_EBX + 4)
+#define TSS_OFF_ESI     (TSS_OFF_EBP + 4)
+#define TSS_OFF_EDI     (TSS_OFF_ESI + 4)
+#define TSS_OFF_ES      (TSS_OFF_EDI + 4)
+#define TSS_OFF_CS      (TSS_OFF_ES + 4)
+#define TSS_OFF_SS      (TSS_OFF_CS + 4)
+#define TSS_OFF_DS      (TSS_OFF_SS + 4)
+#define TSS_OFF_FS      (TSS_OFF_DS + 4)
+#define TSS_OFF_GS      (TSS_OFF_FS + 4)
+#define TSS_OFF_LDTR    (TSS_OFF_GS + 4)
+#define TSS_OFF_TRAP    (TSS_OFF_LDTR + 4)
+#define TSS_OFF_IOBASE  (TSS_OFF_TRAP + 2)
 
 #endif // CONST_H_

@@ -5,6 +5,7 @@
 #include "global.h"
 #include "int_handler.h"
 #include "kinit.h"
+#include "sys/task.h"
 
 
 static void setup_8259a();
@@ -115,9 +116,13 @@ void setup_gdts()
         GDT_PG | GDT_32BIT
     );
 
-    for (int i = GDT_LDT_IDX(0); i < NUM_GDT; ++i)
+    for (int i = 0; i < (N_TASK + N_UTASK); ++i)
     {
-        init_gdt(&gdts[i], 0, 0, 0, 0);
+        init_gdt(
+            &gdts[GDT_LDT_IDX(i)], (uint32_t)proc_tbl[i].ldts,
+            LDT_SIZE * NUM_LDT, GDT_RW | GDT_PRES,
+            0
+        );
     }
 }
 
