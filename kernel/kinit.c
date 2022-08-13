@@ -66,6 +66,7 @@ static void setup_irq_tbl()
 static void setup_tss()
 {
     init_tss(&tss, 4096, GDT_SELECTOR_CODE);
+    tss.ss0 = GDT_SELECTOR_DATA;
 }
 
 

@@ -1,8 +1,8 @@
 #ifndef CONST_H_
 #define CONST_H_
 
-#define KER_STACK_SIZE 4096
-#define TASK_STACK_SIZE 4096
+#define KER_STACK_SIZE 8192
+#define TASK_STACK_SIZE 8192
 
 #define NUM_GDT 128
 #define NUM_IDT 256
@@ -68,6 +68,7 @@
 #define PROC_OFF_ESP            (PROC_OFF_EFLAGS + 4)
 #define PROC_OFF_SS             (PROC_OFF_ESP + 4)
 #define PROC_OFF_LDT            (PROC_OFF_SS + 4)
+#define PROC_OFF_STACKTOP       (PROC_OFF_SS + 4)
 #define PROC_OFF_TICKS          (PROC_OFF_LDT + (NUM_LDT * LDT_SIZE))
 #define PROC_OFF_PRIORITY       (PROC_OFF_TICKS + 4)
 #define PROC_OFF_PID            (PROC_OFF_PRIORITY + 4)

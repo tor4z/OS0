@@ -3,6 +3,7 @@
 #include <sys/task.h>
 #include <string.h>
 #include "global.h"
+#include "kio.h"
 #include "misc.h"
 #include "sys/const.h"
 
@@ -53,14 +54,14 @@ void setup_proc_tbl()
 
     for (int i = NUM_TASK; i < NUM_UTASK + NUM_TASK; ++i)
     {
-        proc_tbl[i].regs.cs = LDT_SELECTOR_CODE | SELECTOR_LDT | tasks[i].rpl;
-        proc_tbl[i].regs.ds = LDT_SELECTOR_DATA | SELECTOR_LDT | tasks[i].rpl;
-        proc_tbl[i].regs.es = LDT_SELECTOR_DATA | SELECTOR_LDT | tasks[i].rpl;
-        proc_tbl[i].regs.fs = LDT_SELECTOR_DATA | SELECTOR_LDT | tasks[i].rpl;
-        proc_tbl[i].regs.gs = LDT_SELECTOR_DATA | SELECTOR_LDT | tasks[i].rpl;
-        proc_tbl[i].regs.ss = LDT_SELECTOR_DATA | SELECTOR_LDT | tasks[i].rpl;
+        proc_tbl[i].regs.cs = LDT_SELECTOR_CODE | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.ds = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.es = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.fs = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.gs = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.ss = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
         
-        proc_tbl[i].regs.eip = tasks[i].ptr;
+        proc_tbl[i].regs.eip = user_tasks[i - NUM_TASK].ptr;
         proc_tbl[i].regs.esp = stacktop;
         proc_tbl[i].regs.eflags = UTASK_EFLAGS;
 
@@ -69,21 +70,21 @@ void setup_proc_tbl()
             &gdts[GDT_CODE_IDX],
             sizeof(struct gdt)
         );
-        UPDATE_LDT_ACCB(proc_tbl[i].ldts[0], GDT_DPL_MASK, tasks[i].dpl);
+        UPDATE_LDT_ACCB(proc_tbl[i].ldts[0], GDT_DPL_MASK, user_tasks[i - NUM_TASK].dpl);
         memcpy(
             proc_tbl[i].ldts + 1,
             &gdts[GDT_DATA_IDX],
             sizeof(struct gdt)
         );
-        UPDATE_LDT_ACCB(proc_tbl[i].ldts[1], GDT_DPL_MASK, tasks[i].dpl);
+        UPDATE_LDT_ACCB(proc_tbl[i].ldts[1], GDT_DPL_MASK, user_tasks[i - NUM_TASK].dpl);
         proc_tbl[i].priority = 5;
         proc_tbl[i].ticks = proc_tbl[i].priority;
         proc_tbl[i].pid = i;
         proc_tbl[i].tty = 0; // not used yet
-        proc_tbl[i].ldt_selector = GDT_LDT_IDX(i);
-        strcpy(proc_tbl[i].name, tasks[i].name);
+        proc_tbl[i].ldt_selector = GDT_SELECTOR_LDT(i);
+        strcpy(proc_tbl[i].name, user_tasks[i - NUM_TASK].name);
 
-        stacktop -= tasks[i].stack_size;        
+        stacktop -= user_tasks[i - NUM_TASK].stack_size;        
     }
 }
 
@@ -97,8 +98,8 @@ void schedule()
         {
             if(greatest < proc_tbl[i].ticks)
             {
-                greatest = proc_tbl[i].ticks;
                 curr_proc = &proc_tbl[i];
+                greatest = curr_proc->ticks;
             }
         }
 

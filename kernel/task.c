@@ -38,7 +38,7 @@ void setup_utasks()
 
 static void dummy_sleep()
 {
-    int n = 99999999;
+    uint32_t n = 99999;
     while (n)
         --n;
 }
@@ -46,11 +46,8 @@ static void dummy_sleep()
 
 static void task_a()
 {
-    char buff[16];
     while (1)
     {
-        kprint("kreenter: ");
-        kputs(itoa(kreenter, buff, 10));
         kputs("task a, sys task");
         dummy_sleep();
     }

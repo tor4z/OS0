@@ -7,7 +7,7 @@
 
 
 #define NAME_SIZE 32        // task name size
-#define STACK_SIZE 128      // stack size
+#define STACK_SIZE 512      // stack size
 
 #define DPL0 GDT_DPL0
 #define DPL1 GDT_DPL1

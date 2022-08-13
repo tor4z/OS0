@@ -1,7 +1,7 @@
 #include <sys/const.h>
 
     .extern curr_proc
-    .extern ker_stackbase
+    .extern ker_stacktop
     .extern inc_kreenter
     .extern dec_kreenter
     .extern master_int
@@ -14,11 +14,9 @@
 restart:
     movl curr_proc, %esp
     lldt PROC_OFF_LDT_SELECTOR(%esp)
-    // leal PROC_OFF_SS(%esp), %eax
+    leal PROC_OFF_STACKTOP(%esp), %eax
     movl $tss, %esi
-    movl %ss, %eax
-    movl %eax, TSS_OFF_SS0(%esi)
-    movl %esp, TSS_OFF_ESP0(%esi)
+    movl %eax, TSS_OFF_ESP0(%esi)
 restart_enter:
     decl kreenter
     popl %gs
@@ -38,13 +36,18 @@ save:
     pushl %fs
     pushl %gs
 
+    movl %esp, %esi
+    movw %ss, %dx
+    movw %dx, %ds
+    movw %dx, %es
+    movw %dx, %fs
+    movw %dx, %gs
+
     incl kreenter
     cmpl $0, kreenter
-    je in_kernel
-
-    movl %esp, %esi
+    jne in_kernel
 not_kernel:
-    movl $ker_stackbase, %esp   // kernel stack top
+    movl ker_stacktop, %esp   // kernel stack top
     pushl $restart
     jmp save_ret
 in_kernel:

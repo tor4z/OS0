@@ -10,13 +10,6 @@
 
 void clock_handler()
 {
-    char buff[16];
-    kputs("clock");
-    kprint("curr_proc->ticks: ");
-    kputs(itoa(curr_proc->ticks, buff, 10));
-    kprint("kreenter: ");
-    kputs(itoa(kreenter, buff, 10));
-
     --curr_proc->ticks;
 
     if (kreenter)   // in kernel

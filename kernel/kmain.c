@@ -20,12 +20,6 @@ int kmain()
     curr_proc = proc_tbl;
     init_clock();
 
-    char buff[16];
-    kputs(itoa((uint32_t)curr_proc, buff, 16));
-    
-    kprint("kreenter: ");
-    kputs(itoa(kreenter, buff, 10));
-
     restart();
     // We will never reach here.
     return 0;
