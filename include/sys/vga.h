@@ -15,4 +15,3 @@ void write_screen_xy(char c, uint32_t x, uint32_t y);
 
 
 #endif // VGA_H_
-

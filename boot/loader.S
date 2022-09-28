@@ -201,7 +201,7 @@ static_elf_loader:
     pushl %edi
 
     movl 8(%ebp), %eax
-    movzx ELF_PHNUM_OFFSET(%eax), %ecx        /* read the number program header */
+    movzx ELF_PHNUM_OFFSET(%eax), %ecx      /* read the number program header */
     movl 8(%ebp), %eax
     addl $ELF_PH_OFFSET, %eax               /* skip ELF file header */
     movl %eax, -4(%ebp)

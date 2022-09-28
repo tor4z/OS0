@@ -1,5 +1,5 @@
 C_SRCS := $(wildcard *.c)
-OBJS := $(patsubst %.c,%.o,$(C_SRCS))
+OBJS   := $(patsubst %.c,%.o,$(C_SRCS))
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -1,40 +1,42 @@
-CC := gcc
-AS := as
-LD := ld
-AR := ar
-MAKE := make
-OBJCOPY := objcopy
-QEMU := qemu-system-i386
-BOCHS := bochs
+CC        := gcc
+AS        := as
+LD        := ld
+AR        := ar
+MAKE      := make
+OBJCOPY   := objcopy
+QEMU      := qemu-system-i386
+BOCHS     := bochs
 ROOT_PATH := $(shell pwd)
 
 
-BOOT_DIR := boot
-KLIB_DIR := lib
+BOOT_DIR   := boot
+KLIB_DIR   := lib
 KERNEL_DIR := kernel
-DOC_DIR := Documentation
+DOC_DIR    := Documentation
 
-KLIB := libk.a
-BOOT := boot.bin
-LOADER := loader.bin
-KERNEL := kernel.bin
-IMG := a.img
+KLIB       := libk.a
+BOOT       := boot.bin
+LOADER     := loader.bin
+KERNEL     := kernel.bin
+IMG        := a.img
 BOCHS_CONF := bochsrc.yaml
 
-KLIB_PATH := $(ROOT_PATH)/$(KLIB_DIR)/$(KLIB)
-BOOT_PATH := $(ROOT_PATH)/$(BOOT_DIR)/$(BOOT)
-LOADER_PATH := $(ROOT_PATH)/$(BOOT_DIR)/$(LOADER)
-KERNEL_PATH := $(ROOT_PATH)/$(KERNEL_DIR)/$(KERNEL)
+KLIB_PATH        := $(ROOT_PATH)/$(KLIB_DIR)/$(KLIB)
+BOOT_PATH        := $(ROOT_PATH)/$(BOOT_DIR)/$(BOOT)
+LOADER_PATH      := $(ROOT_PATH)/$(BOOT_DIR)/$(LOADER)
+KERNEL_PATH      := $(ROOT_PATH)/$(KERNEL_DIR)/$(KERNEL)
 KLIB_SEARCH_PATH := $(ROOT_PATH)/$(KLIB_DIR)
 
 
-BOOT_ENTRY := 0x7c00
+BOOT_ENTRY   := 0x7c00
 LOADER_ENTRY := 0x9200
 KERNEL_ENTRY := 0x30400
-CFLAGS := -Wall -nostdinc -fno-builtin -m32 -MD
-CFLAGS += -Wno-format -Wno-unused -Werror
-CFLAGS += -fno-omit-frame-pointer -fno-stack-protector
-CFLAGS += -I$(ROOT_PATH)/include
+
+
+CFLAGS  := -Wall -nostdinc -fno-builtin -m32 -MD
+CFLAGS  += -Wno-format -Wno-unused -Werror
+CFLAGS  += -fno-omit-frame-pointer -fno-stack-protector
+CFLAGS  += -I$(ROOT_PATH)/include
 ASFLAGS := --32
 LDFLAGS := -m elf_i386
 

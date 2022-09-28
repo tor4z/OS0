@@ -45,7 +45,7 @@ char *itoa (int value, char *str, int base)
             v /= 8;
             ++s;
         }
-        
+
         *s = '0';
 
         reverse(str, s);

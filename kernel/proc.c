@@ -1,11 +1,11 @@
+#include <sys/const.h>
 #include <sys/proc.h>
 #include <sys/protect.h>
 #include <sys/task.h>
 #include <string.h>
+#include <kio.h>
 #include "global.h"
-#include "kio.h"
 #include "misc.h"
-#include "sys/const.h"
 
 
 #define UPDATE_LDT_ACCB(ldt, mask, attr) \

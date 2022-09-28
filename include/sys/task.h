@@ -19,7 +19,7 @@
 #define RPL2 SELECTOR_RPL2
 #define RPL3 SELECTOR_RPL3
 
-#define NUM_TASK 1        // number of system task
+#define NUM_TASK  1       // number of system task
 #define NUM_UTASK 2       // number of user task
 
 // bit 2 is always 1

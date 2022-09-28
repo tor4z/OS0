@@ -1,11 +1,12 @@
 #include <sys/const.h>
 #include <sys/clock.h>
 #include <sys/proc.h>
+#include <klib.h>
+#include <kio.h>
 #include "8259a.h"
 #include "global.h"
 #include "int_handler.h"
-#include "klib.h"
-#include <kio.h>
+
 
 
 void clock_handler()

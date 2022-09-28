@@ -22,7 +22,7 @@ void *memcpy(void *dest, const void *src, size_t n)
 void *memset(void *ptr, int x, size_t n)
 {
     /*
-     * c − This is the value to be set. The value is passed as an
+     * x − This is the value to be set. The value is passed as an
      * int, but the function fills the block of memory using the
      * unsigned char conversion of this value.
      *
@@ -76,4 +76,3 @@ size_t strlen(const char *str)
     }
     return len;
 }
-

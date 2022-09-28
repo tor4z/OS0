@@ -47,7 +47,7 @@ save:
     cmpl $0, kreenter
     jne in_kernel
 not_kernel:
-    movl ker_stacktop, %esp   // kernel stack top
+    movl ker_stacktop, %esp   /* kernel stack top */
     pushl $restart
     jmp save_ret
 in_kernel:
