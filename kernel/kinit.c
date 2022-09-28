@@ -7,6 +7,7 @@
 #include "global.h"
 #include "int_handler.h"
 #include "kinit.h"
+#include "syscall_impl.h"
 #include "8259a.h"
 
 
@@ -15,6 +16,7 @@ static void setup_paging();
 static void setup_gdts();
 static void setup_idts();
 static void setup_irq_tbl();
+static void setup_syscall_tbl();
 
 
 void kinit()
@@ -24,6 +26,7 @@ void kinit()
     setup_idtr();
     setup_tss();
     setup_irq_tbl();
+    setup_syscall_tbl();
 
     __asm__ __volatile__(
         "lgdt (%0)"
@@ -51,6 +54,12 @@ void kinit()
 
     // init global variables
     kreenter = 0;
+}
+
+
+static void setup_syscall_tbl()
+{
+    system_call_tbl[SYSCALL_GET_TICKS] = sys_get_ticks;
 }
 
 
@@ -150,7 +159,7 @@ void setup_idts()
         init_idt(
             &idts[i], (uint32_t)phony_handler, GDT_SELECTOR_CODE,
             INT_GATE_P | INT_GATE_PL0 | INT_GATE_INT32
-        );        
+        );
     }
 
     init_idt(

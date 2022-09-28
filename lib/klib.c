@@ -105,7 +105,6 @@ char *itoa (int value, char *str, int base)
             ++s;
         }
 
-
         if (negtive)
         {
             *s = '-';

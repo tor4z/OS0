@@ -54,13 +54,19 @@ void setup_proc_tbl()
 
     for (int i = NUM_TASK; i < NUM_UTASK + NUM_TASK; ++i)
     {
-        proc_tbl[i].regs.cs = LDT_SELECTOR_CODE | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
-        proc_tbl[i].regs.ds = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
-        proc_tbl[i].regs.es = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
-        proc_tbl[i].regs.fs = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
-        proc_tbl[i].regs.gs = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
-        proc_tbl[i].regs.ss = LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
-        
+        proc_tbl[i].regs.cs =
+            LDT_SELECTOR_CODE | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.ds = 
+            LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.es = 
+            LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.fs = 
+            LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.gs = 
+            LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+        proc_tbl[i].regs.ss = 
+            LDT_SELECTOR_DATA | SELECTOR_LDT | user_tasks[i - NUM_TASK].rpl;
+
         proc_tbl[i].regs.eip = user_tasks[i - NUM_TASK].ptr;
         proc_tbl[i].regs.esp = stacktop;
         proc_tbl[i].regs.eflags = UTASK_EFLAGS;

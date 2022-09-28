@@ -53,7 +53,8 @@ not_kernel:
 in_kernel:
     pushl $restart_enter
 save_ret:
-    jmp PROC_OFF_RET(%esi)
+    /* Don't use ret here, to keep the stack data */
+    jmp *PROC_OFF_RET(%esi)
 
 
     .global irq0_handler
@@ -63,4 +64,16 @@ irq0_handler:
     pushl $0
     call master_int
     addl $4, %esp
+    ret
+
+
+    .global syscall_handler
+    .type syscall_handler, @function
+syscall_handler:
+    call save
+    sti
+    call system_call_tbl(, %eax, 4)
+    /* The value of %esi is the stacktop of the process */
+    movl %eax, PROC_OFF_EAX(%esi)
+    cli
     ret

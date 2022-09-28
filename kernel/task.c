@@ -1,4 +1,5 @@
 #include <sys/task.h>
+#include <sys/syscall.h>
 #include <kio.h>
 #include <string.h>
 #include <klib.h>
@@ -48,6 +49,7 @@ static void task_a()
 {
     while (1)
     {
+        get_ticks();
         kputs("task a, sys task");
         dummy_sleep();
     }

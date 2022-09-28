@@ -5,6 +5,7 @@
 #include <sys/protect.h>
 #include <sys/task.h>
 #include <sys/proc.h>
+#include <sys/syscall.h>
 #include <type.h>
 
 
@@ -35,6 +36,8 @@ EXTERN irq_handler irq_tbl[NUM_IRQ];
 // EXTERN uint32_t kreenter;
 EXTERN uint32_t ker_stacktop;
 extern uint32_t kreenter;
+
+EXTERN system_call system_call_tbl[NUM_SYSCALL];
 
 #undef EXTERN
 #endif // GLOBAL_H_

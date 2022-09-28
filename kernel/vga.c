@@ -10,7 +10,7 @@ static void write_newline();
 
 void clean_screen()
 {
-    uint32_t total = SCRN_H * SCRN_W;        // the number of data to fill
+    uint32_t total = SCRN_H * SCRN_W;   // the number of data to fill
 
     __asm__ __volatile__(
         "movw $0x0720, %%ax\n\t"        // the data to fill

@@ -596,7 +596,6 @@ TSS_SECTION:
     .set tss_len, (. - TSS_SECTION)
 
 
-
 kernel_filename:
     .ascii "KERNEL  BIN"
 init_loader_msg:

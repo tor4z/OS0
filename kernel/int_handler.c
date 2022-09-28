@@ -333,10 +333,19 @@ void set_irq_handler(int id, irq_handler handler)
 }
 
 
-void syscall_handler()
-{
-    kprint("int 0x88");
-}
+// void syscall_handler()
+// {
+//     save();
+//     ENABLE_INT();
+//     int val = system_call_tbl[0]();
+//     __asm__ __volatile__(
+//         ""
+//         : /* no output */
+//         :
+//         :
+//     );
+//     DISABLE_INT();
+// }
 
 
 static void exception_handler(
