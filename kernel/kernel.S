@@ -17,4 +17,5 @@ _start:
 
     call kinit
     call kmain
+    /* We will never reach here. */
     jmp .
