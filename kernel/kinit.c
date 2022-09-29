@@ -313,9 +313,3 @@ void setup_idts()
         INT_GATE_P | INT_GATE_PL3 | INT_GATE_INT32
     );
 }
-
-
-static void setup_pic()
-{
-    setup_8259a();
-}
